@@ -3,6 +3,7 @@ package cz.f0lik.zoumi.controller
 import cz.f0lik.zoumi.model.Article
 import cz.f0lik.zoumi.model.Comment
 import cz.f0lik.zoumi.repository.ArticleRepository
+import cz.f0lik.zoumi.services.TextAnalysisService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -13,6 +14,9 @@ class ArticleController {
 
     @Autowired
     var articleRepository: ArticleRepository? = null
+
+    @Autowired
+    private val textAnalysisService: TextAnalysisService? = null
 
     @PostMapping("/articles")
     fun createNote(@Valid @RequestBody note: Article): Article {
@@ -39,5 +43,10 @@ class ArticleController {
     @GetMapping("/articles")
     fun getAllNotes(): List<Article> {
         return articleRepository!!.findAll()
+    }
+
+    @GetMapping("/articles/similarity/{id1}/{id2}")
+    fun compareArticles(@PathVariable(value = "id1") articleId1: Long, @PathVariable(value = "id2") articleId2: Long): Boolean {
+        return textAnalysisService!!.compareArticles(articleId1, articleId2)
     }
 }
