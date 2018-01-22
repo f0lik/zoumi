@@ -46,6 +46,6 @@ class ArticleTest {
 
         val foundArticle = repository!!.findOne(article2.id)
 
-        assertThat(foundArticle, `is`(equalTo(article1)))
+        assertThat(foundArticle, `is`(equalTo(article2)))
     }
 }
