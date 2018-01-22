@@ -7,8 +7,6 @@ import info.debatty.java.stringsimilarity.NGram
 import org.springframework.stereotype.Service
 import info.debatty.java.stringsimilarity.JaroWinkler
 
-
-
 @Service("textAnalysisService")
 class TextAnalysisServiceImpl : TextAnalysisService {
     val SIMILARITY_LIMIT = 0.15
@@ -24,13 +22,11 @@ class TextAnalysisServiceImpl : TextAnalysisService {
 
         val twogram = NGram(4)
         val jw = JaroWinkler()
-        firstArticle.comments!!.forEach {
-            first->
+        firstArticle.comments!!.forEach { first ->
             run {
 
-                secondArticle.comments!!.forEach {
-                    second->
-                    run{
+                secondArticle.comments!!.forEach { second ->
+                    run {
                         println("Comparing \n->" + first.commentText + "\n with -> " + second.commentText)
                         var sim = twogram.distance(first.commentText, second.commentText)
                         var sim2 = jw.distance(first.commentText, second.commentText)

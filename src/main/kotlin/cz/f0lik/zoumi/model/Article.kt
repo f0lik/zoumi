@@ -15,11 +15,11 @@ class Article {
     var id: Long? = null
 
     @NotBlank
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     var title: String? = null
 
     @NotBlank
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     var anotation: String? = null
 
     @NotBlank
