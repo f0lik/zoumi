@@ -9,6 +9,15 @@ import javax.persistence.*
 @Table(name = "articles")
 @JsonIgnoreProperties(value = ["comments"], allowGetters = true)
 class Article {
+
+    constructor(title: String, anotation: String, url: String): this() {
+        this.title = title
+        this.anotation = anotation
+        this.url = url
+    }
+
+    constructor()
+
     @Id
     @Column(name = "article_id")
     @GeneratedValue
