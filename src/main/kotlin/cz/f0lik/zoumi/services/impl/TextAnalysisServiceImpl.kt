@@ -33,8 +33,6 @@ class TextAnalysisServiceImpl : TextAnalysisService {
                         if (sim < SIMILARITY_LIMIT || sim2 < SIMILARITY_LIMIT) {
                             somethingSimilar = true
                         }
-                        println("--Similarity(NGram) is " + sim * 100 + "%")
-                        println("--Similarity(JaroWinkler) is " + sim2 * 100 + "%")
                     }
                 }
             }
