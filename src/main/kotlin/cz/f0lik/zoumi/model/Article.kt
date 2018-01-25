@@ -40,7 +40,7 @@ class Article {
     var comments: MutableSet<Comment>? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "portal_id", nullable = false)
+    @JoinColumn(name = "portal_id")
     @JsonBackReference
     var portal: Portal? = null
 }
