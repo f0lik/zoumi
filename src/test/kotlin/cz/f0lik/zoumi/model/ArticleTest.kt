@@ -29,7 +29,9 @@ class ArticleTest {
 
     @Test
     fun shouldContainArticle() {
-        val article = repository!!.save(Article("Title", "Anotation", "www.seznam.cz"))
+        val article1 = Article("Title", "Anotation", "www.seznam.cz")
+        article1.comments = HashSet()
+        val article = repository!!.save(article1)
 
         assertEquals("Title", article.title)
         assertEquals("Anotation", article.anotation)
@@ -39,6 +41,7 @@ class ArticleTest {
     @Test
     fun shouldFindArticleById() {
         val article1 = Article("Title", "Anotation", "www.seznam.cz")
+        article1.comments = HashSet()
         entityManager!!.persist(article1)
 
         val article2 = Article("None", "My text", "www.idnes.cz")
