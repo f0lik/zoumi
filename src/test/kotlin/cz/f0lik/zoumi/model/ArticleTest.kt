@@ -22,13 +22,13 @@ class ArticleTest {
     private val repository: ArticleRepository? = null
 
     @Test
-    fun should_find_no_articles_if_repository_is_empty() {
+    fun shouldFindNoArticles() {
         val customers = repository!!.findAll()
         assertThat(customers.size, `is`(equalTo(0)))
     }
 
     @Test
-    fun should_store_article() {
+    fun shouldContainArticle() {
         val article = repository!!.save(Article("Title", "Anotation", "www.seznam.cz"))
 
         assertEquals("Title", article.title)
@@ -37,7 +37,7 @@ class ArticleTest {
     }
 
     @Test
-    fun should_find_article_by_id() {
+    fun shouldFindArticleById() {
         val article1 = Article("Title", "Anotation", "www.seznam.cz")
         entityManager!!.persist(article1)
 

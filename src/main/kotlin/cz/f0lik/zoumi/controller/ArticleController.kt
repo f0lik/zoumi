@@ -19,8 +19,8 @@ class ArticleController {
     private val textAnalysisService: TextAnalysisService? = null
 
     @PostMapping("/articles")
-    fun createNote(@Valid @RequestBody note: Article): Article {
-        return articleRepository!!.save(note)
+    fun createArticle(@Valid @RequestBody article: Article): Article {
+        return articleRepository!!.save(article)
     }
 
     @PostMapping("/articles/{id}")

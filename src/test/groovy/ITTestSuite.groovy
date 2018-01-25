@@ -6,6 +6,6 @@ import org.junit.runners.Suite
         ZMainSpec.class,
 ])
 
-public class TestSuite {
+public class ITTestSuite {
 
 }

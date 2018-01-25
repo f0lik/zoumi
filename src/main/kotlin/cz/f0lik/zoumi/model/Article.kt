@@ -1,5 +1,6 @@
 package cz.f0lik.zoumi.model
 
+import com.fasterxml.jackson.annotation.JsonBackReference
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonManagedReference
 import org.hibernate.validator.constraints.NotBlank
@@ -37,4 +38,9 @@ class Article {
     @OneToMany(cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY, mappedBy = "article")
     @JsonManagedReference
     var comments: MutableSet<Comment>? = null
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "portal_id", nullable = false)
+    @JsonBackReference
+    var portal: Portal? = null
 }
