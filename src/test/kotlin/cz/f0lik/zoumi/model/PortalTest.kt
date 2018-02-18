@@ -42,7 +42,7 @@ class PortalTest {
         val firstPortal = portalBuilder(PORTAL_NAME, PORTAL_URL)
         entityManager!!.persist(firstPortal)
         val secondPortal = portalBuilder("Novinky", "http://www.novinky.cz")
-        entityManager.persist(secondPortal)
+        entityManager!!.persist(secondPortal)
         val foundArticle = portalRepository!!.findOne(secondPortal.id)
 
         Assert.assertThat(foundArticle, CoreMatchers.`is`(CoreMatchers.equalTo(secondPortal)))

@@ -45,7 +45,7 @@ class ArticleTest {
         entityManager!!.persist(article1)
 
         val article2 = Article("None", "My text", "www.idnes.cz")
-        entityManager.persist(article2)
+        entityManager!!.persist(article2)
 
         val foundArticle = repository!!.findOne(article2.id)
 
