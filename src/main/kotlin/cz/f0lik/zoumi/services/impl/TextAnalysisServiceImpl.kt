@@ -1,42 +1,66 @@
 package cz.f0lik.zoumi.services.impl
 
+import cz.f0lik.zoumi.model.SimilarComment
 import cz.f0lik.zoumi.repository.ArticleRepository
+import cz.f0lik.zoumi.repository.SimilarCommentRepository
 import cz.f0lik.zoumi.services.TextAnalysisService
+import info.debatty.java.stringsimilarity.Jaccard
 import org.springframework.beans.factory.annotation.Autowired
-import info.debatty.java.stringsimilarity.NGram
 import org.springframework.stereotype.Service
-import info.debatty.java.stringsimilarity.JaroWinkler
 
 @Service("textAnalysisService")
 class TextAnalysisServiceImpl : TextAnalysisService {
-    val SIMILARITY_LIMIT = 0.15
+    val SIMILARITY_LIMIT = 0.7
 
     @Autowired
     var articleRepository: ArticleRepository? = null
 
+    @Autowired
+    var similarCommentRepository: SimilarCommentRepository? = null
+
     override fun compareArticles(firstArticleId: Long, secondArticleId: Long): Boolean {
-        var firstArticle = articleRepository!!.findOne(firstArticleId)
-        var secondArticle = articleRepository!!.findOne(secondArticleId)
+        val firstArticle = articleRepository!!.findOne(firstArticleId)
+        val secondArticle = articleRepository!!.findOne(secondArticleId)
 
         var somethingSimilar = false
 
-        val twogram = NGram(4)
-        val jw = JaroWinkler()
+        val jaccard = Jaccard()
         firstArticle.comments!!.forEach { first ->
             run {
-
                 secondArticle.comments!!.forEach { second ->
                     run {
-                        println("Comparing \n->" + first.commentText + "\n with -> " + second.commentText)
-                        var sim = twogram.distance(first.commentText, second.commentText)
-                        var sim2 = jw.distance(first.commentText, second.commentText)
-                        if (sim < SIMILARITY_LIMIT || sim2 < SIMILARITY_LIMIT) {
+                        if (first.commentText.equals(second.commentText)) {
+                            return@forEach
+                        }
+                        if (doSimilarCommentAlreadyExist(first.id!!, second.id!!)) {
+                            return@forEach
+                        }
+                        val similarity = jaccard.similarity(first.commentText, second.commentText)
+                        if (similarity > SIMILARITY_LIMIT) {
                             somethingSimilar = true
+                            val similarComment = SimilarComment()
+                            similarComment.firstCommentId = first.id
+                            similarComment.secondCommentId = second.id
                         }
                     }
                 }
             }
         }
         return somethingSimilar
+    }
+
+    private fun doSimilarCommentAlreadyExist(id1: Long, id2: Long): Boolean {
+        val similarComments = similarCommentRepository!!.findAll()
+
+        similarComments.forEach { similarComment ->
+            run {
+                if (similarComment.firstCommentId == id1 && similarComment.secondCommentId == id2) {
+                    return true
+                } else if (similarComment.firstCommentId == id2 && similarComment.secondCommentId == id1) {
+                    return true
+                }
+            }
+        }
+        return false
     }
 }
