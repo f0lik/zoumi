@@ -22,7 +22,7 @@ class Portal {
     @Column(columnDefinition = "text")
     var url: String? = null
 
-    @OneToMany(cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY, mappedBy = "portal")
+    @OneToMany(cascade = arrayOf(CascadeType.ALL), fetch = FetchType.EAGER, mappedBy = "portal")
     @JsonManagedReference
     var articles: MutableSet<Article>? = null
 }

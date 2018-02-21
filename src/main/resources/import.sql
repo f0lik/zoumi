@@ -2,6 +2,8 @@ INSERT INTO articles (article_id, anotation, title, url) VALUES (1, 'Tragická n
 INSERT INTO articles (article_id, anotation, title, url) VALUES (6, 'Autobus se v pátek odpoledne na pomezí Prahy a Středočeského kraje nedaleko Horoměřic srazil s autem a následně narazil do stromu. Podle záchranné služby tři lidé zemřeli, zraněných je 45, z toho pět je ve vážném stavu. Mezi zraněnými jsou i děti.', 'U Prahy narazil autobus do stromu. Tři lidé zahynuli, mezi zraněnými jsou děti', 'https://www.novinky.cz/krimi/460383-u-prahy-narazil-autobus-do-stromu-tri-lide-zahynuli-mezi-zranenymi-jsou-deti.html');
 
 INSERT INTO comments VALUES (2,	'Martin Jurečka', 'svádí řidiče silných vozů... spíše svádí řidiče slabé mysli',	1);
+INSERT INTO comments VALUES (12,	'Pepa Omacka', 'svádí řidiče silných ... spíše svádí řidiče slabé mysli',	1);
+INSERT INTO comments VALUES (13,	'Pepa Omacka', 'svádí řidiče silných motorek ... spíše svádí řidiče slabé mysli',	6);
 INSERT INTO comments VALUES (3,	'Jan Lavický', 'Řidiči autobusů bez psychotestů za volant nesednou.Mladé,sebevědomé slečně do silného auta sednout nikdo nezakáže.......', 1);
 INSERT INTO comments VALUES (4,	'Jaromír Štohansl', 'Nemůžu si pomoct, ale jak vidím bílý Superb (nebo podobné bílé auto vyšší třídy) očekávám agresivního řidiče, který potřebuje být doma o 2 minuty dříve.Když k tomu přičtu nízký věk řidičky...nevím co se tam stalo, ale je větší šance, že je to klasická agresivní a arogantní jízda řidiče v bíle limuzíně.',	1);
 INSERT INTO comments VALUES (5,	'Rostislav Vomáčka', 'Takže jezdí se tam 1350 km/h průměrné a nezapomeneme na to upozornit v nadpisu. Že se tam prakticky nebourá, to utopíme někde uprostřed článku.',	1);

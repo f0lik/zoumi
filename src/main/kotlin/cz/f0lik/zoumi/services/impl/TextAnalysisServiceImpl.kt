@@ -1,5 +1,6 @@
 package cz.f0lik.zoumi.services.impl
 
+import cz.f0lik.zoumi.model.Comment
 import cz.f0lik.zoumi.model.SimilarComment
 import cz.f0lik.zoumi.repository.ArticleRepository
 import cz.f0lik.zoumi.repository.SimilarCommentRepository
@@ -7,20 +8,21 @@ import cz.f0lik.zoumi.services.TextAnalysisService
 import info.debatty.java.stringsimilarity.Jaccard
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import kotlin.collections.HashMap
 
 @Service("textAnalysisService")
 class TextAnalysisServiceImpl : TextAnalysisService {
     val SIMILARITY_LIMIT = 0.7
 
     @Autowired
-    var articleRepository: ArticleRepository? = null
+    lateinit var articleRepository: ArticleRepository
 
     @Autowired
     var similarCommentRepository: SimilarCommentRepository? = null
 
     override fun compareArticles(firstArticleId: Long, secondArticleId: Long): Boolean {
-        val firstArticle = articleRepository!!.findOne(firstArticleId)
-        val secondArticle = articleRepository!!.findOne(secondArticleId)
+        val firstArticle = articleRepository.findOne(firstArticleId)
+        val secondArticle = articleRepository.findOne(secondArticleId)
 
         var somethingSimilar = false
 
@@ -40,7 +42,11 @@ class TextAnalysisServiceImpl : TextAnalysisService {
                             somethingSimilar = true
                             val similarComment = SimilarComment()
                             similarComment.firstCommentId = first.id
+                            similarComment.firstCommentArticleId = first.article!!.id
                             similarComment.secondCommentId = second.id
+                            similarComment.secondCommentArticleId = second.article!!.id
+                            similarComment.similarity = (similarity * 100).toInt()
+                            similarCommentRepository!!.save(similarComment)
                         }
                     }
                 }
@@ -62,5 +68,53 @@ class TextAnalysisServiceImpl : TextAnalysisService {
             }
         }
         return false
+    }
+
+    override fun getSuspiciousCommentsCount(articleId: Long): Int {
+        val articleComments = articleRepository.findOne(articleId).comments
+        val similarComments = similarCommentRepository!!.findAll()
+        var count = 0
+        articleComments!!.forEach { comment ->
+            run {
+                similarComments.forEach { similarComment ->
+                    run {
+                        if (comment.id == similarComment.firstCommentId || comment.id == similarComment.secondCommentId) {
+                            count++
+                        }
+                    }
+                }
+            }
+        }
+        return count
+    }
+
+    override fun getSuspiciousComments(articleId: Long): HashMap<Comment, Int> {
+        val similarComments = similarCommentRepository!!.findAll()
+        var similarityCommentMap = HashMap<Comment, Int>()
+        similarComments.forEach { comment ->
+            getSimilarComment(comment, articleId, similarityCommentMap)
+        }
+        return similarityCommentMap
+    }
+
+    private fun getSimilarComment(comment: SimilarComment, articleId: Long, commentSimMap: HashMap<Comment, Int>) {
+        if (comment.firstCommentArticleId == articleId) {
+            findComment(articleId, comment.firstCommentId!!, commentSimMap, comment.similarity!!)
+        }
+        if (comment.secondCommentArticleId == articleId) {
+            findComment(articleId, comment.secondCommentId!!, commentSimMap, comment.similarity!!)
+        }
+    }
+
+    private fun findComment(articleId: Long, commentId: Long, commentSimMap: HashMap<Comment, Int>, similarity: Int) {
+        val comments = articleRepository.findOne(articleId).comments
+        val foundComment = comments!!.find { comment -> comment.id == commentId }
+        commentSimMap[foundComment!!] = similarity
+    }
+
+    override fun checkAllArticles() {
+        articleRepository.findAll().forEach { article ->
+            compareArticles(article.id!!, article.id!!)
+        }
     }
 }

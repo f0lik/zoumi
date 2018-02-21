@@ -1,6 +1,5 @@
 package cz.f0lik.zoumi.model
 
-import org.hibernate.validator.constraints.NotBlank
 import javax.persistence.*
 
 @Entity
@@ -11,9 +10,13 @@ class SimilarComment {
     @GeneratedValue
     var id: Long? = null
 
-    @NotBlank
     var firstCommentId: Long? = null
 
-    @NotBlank
+    var firstCommentArticleId: Long? = null
+
     var secondCommentId: Long? = null
+
+    var secondCommentArticleId: Long? = null
+
+    var similarity: Int? = null
 }
