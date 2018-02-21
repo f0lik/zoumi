@@ -16,13 +16,13 @@ class ScheduledTasks {
 
     private val dateFormat = SimpleDateFormat("HH:mm:ss")
 
-    @Scheduled(cron = "0 0 */1 * * *")
+    @Scheduled(cron = "0 0 0/2 ? * *")
     fun recountArticleComments() {
         println("Starting recount at " + dateFormat.format(Date()))
         articleService.recountCommentSize()
     }
 
-    @Scheduled(cron = "0 0 */6 * * *")
+    @Scheduled(cron = "0 0 1 * * ?")
     fun checkArticleRoutine() {
         println("Starting check at " + dateFormat.format(Date()))
         textAnalysisService.checkAllArticles()

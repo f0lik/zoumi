@@ -100,7 +100,8 @@ class TextAnalysisServiceImpl : TextAnalysisService {
     private fun getSimilarComment(comment: SimilarComment, articleId: Long, commentSimMap: HashMap<Comment, Int>) {
         if (comment.firstCommentArticleId == articleId) {
             findComment(articleId, comment.firstCommentId!!, commentSimMap, comment.similarity!!)
-        } else if (comment.secondCommentArticleId == articleId) {
+        }
+        if (comment.secondCommentArticleId == articleId) {
             findComment(articleId, comment.secondCommentId!!, commentSimMap, comment.similarity!!)
         }
     }
