@@ -12,7 +12,7 @@ import kotlin.collections.HashMap
 
 @Service("textAnalysisService")
 class TextAnalysisServiceImpl : TextAnalysisService {
-    val SIMILARITY_LIMIT = 0.7
+    val SIMILARITY_LIMIT = 0.6
 
     @Autowired
     lateinit var articleRepository: ArticleRepository
@@ -100,8 +100,7 @@ class TextAnalysisServiceImpl : TextAnalysisService {
     private fun getSimilarComment(comment: SimilarComment, articleId: Long, commentSimMap: HashMap<Comment, Int>) {
         if (comment.firstCommentArticleId == articleId) {
             findComment(articleId, comment.firstCommentId!!, commentSimMap, comment.similarity!!)
-        }
-        if (comment.secondCommentArticleId == articleId) {
+        } else if (comment.secondCommentArticleId == articleId) {
             findComment(articleId, comment.secondCommentId!!, commentSimMap, comment.similarity!!)
         }
     }

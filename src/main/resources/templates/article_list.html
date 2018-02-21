@@ -59,17 +59,25 @@
             <div class="card-body">
               <h2 class="card-title" th:text="${article.title}"></h2>
               <p class="card-text">
-                <!--Tento veterinář operuje v okrese <span th:text="${doctor.city}"></span> a sám o sobě říká že:-->
-                <!--<span th:text="${doctor.perex}"></span>-->
+
               </p>
               <a th:href="@{/article/{articleId}(articleId=${article.id})}"
                  class="btn btn-primary">Zobrazit detail &rarr;</a>
             </div>
             <div class="card-footer text-muted">
-             <!--Evidujeme již od <span th:text="${#dates.format(doctor.createdAt, 'dd-MM-yyyy')}"></span>-->
+
             </div>
           </div>
           </span>
+          <nav aria-label="Page navigation example">
+            <ul class="pagination">
+              <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+              <li class="page-item"><a class="page-link" href="#">1</a></li>
+              <li class="page-item"><a class="page-link" href="#">2</a></li>
+              <li class="page-item"><a class="page-link" href="#">3</a></li>
+              <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            </ul>
+          </nav>
         </div>
 
         <!-- Sidebar Widgets Column -->

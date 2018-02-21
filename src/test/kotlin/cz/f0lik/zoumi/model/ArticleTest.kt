@@ -23,6 +23,7 @@ class ArticleTest {
 
     @Test
     fun shouldFindNoArticles() {
+        repository?.deleteAll()
         val customers = repository!!.findAll()
         assertThat(customers.size, `is`(equalTo(0)))
     }

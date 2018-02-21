@@ -39,6 +39,8 @@ class Article {
     @JsonManagedReference
     var comments: MutableSet<Comment>? = null
 
+    var commentCount: Int? = null
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portal_id")
     @JsonBackReference

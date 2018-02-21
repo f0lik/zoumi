@@ -11,9 +11,18 @@ class ScheduledTasks {
     @Autowired
     lateinit var textAnalysisService: TextAnalysisService
 
+    @Autowired
+    lateinit var articleService: ArticleService
+
     private val dateFormat = SimpleDateFormat("HH:mm:ss")
 
-    @Scheduled(cron = "*/30 * * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
+    fun recountArticleComments() {
+        println("Starting recount at " + dateFormat.format(Date()))
+        articleService.recountCommentSize()
+    }
+
+    @Scheduled(cron = "0 */6 * * * *")
     fun checkArticleRoutine() {
         println("Starting check at " + dateFormat.format(Date()))
         textAnalysisService.checkAllArticles()

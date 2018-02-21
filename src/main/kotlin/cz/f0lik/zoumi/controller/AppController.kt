@@ -2,8 +2,11 @@ package cz.f0lik.zoumi.controller
 
 import cz.f0lik.zoumi.model.Article
 import cz.f0lik.zoumi.repository.ArticleRepository
+import cz.f0lik.zoumi.services.ArticleService
 import cz.f0lik.zoumi.services.TextAnalysisService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,6 +21,9 @@ class AppController {
     @Autowired
     var textService: TextAnalysisService? = null
 
+    @Autowired
+    var articleService: ArticleService? = null
+
     @GetMapping(value = ["/"])
     fun index(model: Model): String {
         val size = articleRepository.findAll().size
@@ -26,12 +32,12 @@ class AppController {
     }
 
     @GetMapping("/articles")
-    fun getArticles(model: Model): ModelAndView {
+    fun getArticles(pageable: Pageable): ModelAndView {
+        val commentsPerPage: Page<Article> = articleService!!.listAllByPage(pageable)
         val modelAndView = ModelAndView()
         modelAndView.viewName = "article_list"
 
-        var articles = articleRepository.findAll()
-        modelAndView.addObject("articles", articles)
+        modelAndView.addObject("articles", commentsPerPage.content)
         return modelAndView
     }
 
