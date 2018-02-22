@@ -1,7 +1,7 @@
-package test
+package integration.test
 
 import geb.spock.GebSpec
-import pages.ZMainPage
+import integration.pages.ZMainPage
 import spock.lang.Stepwise
 
 @Stepwise
