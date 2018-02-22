@@ -21,7 +21,7 @@ class Article {
 
     @Id
     @Column(name = "article_id")
-    /* @GeneratedValue*/
+    @GeneratedValue
     var id: Long? = null
 
     @NotBlank
