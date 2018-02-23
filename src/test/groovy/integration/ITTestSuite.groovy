@@ -1,12 +1,12 @@
 package integration
 
-import integration.test.ZMainSpec
+import integration.test.ZMain
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses([
-        ZMainSpec.class,
+        ZMain.class,
 ])
 
 public class ITTestSuite {

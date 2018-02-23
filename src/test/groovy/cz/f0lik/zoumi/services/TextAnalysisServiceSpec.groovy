@@ -1,12 +1,13 @@
+package cz.f0lik.zoumi.services
+
 import cz.f0lik.zoumi.model.Article
 import cz.f0lik.zoumi.model.Comment
 import cz.f0lik.zoumi.repository.ArticleRepository
 import cz.f0lik.zoumi.repository.SimilarCommentRepository
-import cz.f0lik.zoumi.services.TextAnalysisService
 import org.thymeleaf.util.SetUtils
 import spock.lang.Specification
 
-class TextAnalysisServiceTest extends Specification {
+class TextAnalysisServiceSpec extends Specification {
     SimilarCommentRepository similarCommentRepository = Mock(SimilarCommentRepository)
     ArticleRepository articleRepository = Mock(ArticleRepository)
     TextAnalysisService textAnalysisService =

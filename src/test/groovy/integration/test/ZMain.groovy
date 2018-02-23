@@ -5,7 +5,7 @@ import integration.pages.ZMainPage
 import spock.lang.Stepwise
 
 @Stepwise
-class ZMainSpec extends GebSpec {
+class ZMain extends GebSpec {
 
     def "page contains h1 with specified text"() {
         given: "I'm at home page"
