@@ -7,6 +7,8 @@ import cz.f0lik.zoumi.repository.SimilarCommentRepository
 import info.debatty.java.stringsimilarity.Jaccard
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 import kotlin.collections.HashMap
 
 @Service("textAnalysisService")
@@ -19,35 +21,53 @@ class TextAnalysisService {
     @Autowired
     var similarCommentRepository: SimilarCommentRepository? = null
 
+    var similarComments: List<SimilarComment>? = null
+    val jaccard = Jaccard()
+
     fun compareArticles(firstArticleId: Long, secondArticleId: Long): Boolean {
         val firstArticle = articleRepository.findOne(firstArticleId)
         val secondArticle = articleRepository.findOne(secondArticleId)
 
         var somethingSimilar = false
+        val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1)
 
-        val jaccard = Jaccard()
+        similarComments = similarCommentRepository!!.findAll()
+
         firstArticle.comments!!.forEach { firstComment ->
             run {
-                secondArticle.comments!!.forEach { secondComment ->
+                val callableSimilarityTasks = ArrayList<Callable<Boolean>>()
+                secondArticle.comments!!.forEach inner@ { secondComment ->
                     run {
-                        if (doSimilarCommentAlreadyExist(firstComment.id!!, secondComment.id!!)) {
-                            return@forEach
+                        if (firstComment.id == secondComment.id) {
+                            return@inner
                         }
                         if (firstComment.commentText.equals(secondComment.commentText)) {
-                            somethingSimilar = true
-                            createSimilarComment(firstComment, secondComment, 100.0)
-                            return@forEach
+                            return@inner
                         }
-                        val similarity = jaccard.similarity(firstComment.commentText, secondComment.commentText)
-                        if (similarity > SIMILARITY_LIMIT) {
-                            somethingSimilar = true
-                            createSimilarComment(firstComment, secondComment, similarity)
+                        if (doSimilarCommentAlreadyExist(firstComment.id!!, secondComment.id!!)) {
+                            return@inner
                         }
+                        val callableSimilarityTask = Callable {
+                            checkSimilarity(firstComment, secondComment)
+                        }
+                        callableSimilarityTasks.add(callableSimilarityTask)
                     }
                 }
+                val similarTasks = newFixedThreadPool.invokeAll(callableSimilarityTasks).filter { task -> task.get() == true }
+                somethingSimilar = similarTasks.isNotEmpty()
             }
         }
+        newFixedThreadPool.shutdown()
         return somethingSimilar
+    }
+
+    private fun checkSimilarity(firstComment: Comment, secondComment: Comment): Boolean {
+        val similarity = jaccard.similarity(firstComment.commentText, secondComment.commentText)
+        if (similarity > SIMILARITY_LIMIT) {
+            createSimilarComment(firstComment, secondComment, similarity)
+            return true
+        }
+        return false
     }
 
     private fun createSimilarComment(firstComment: Comment, secondComment: Comment, similarity: Double) {
@@ -61,18 +81,12 @@ class TextAnalysisService {
     }
 
     private fun doSimilarCommentAlreadyExist(id1: Long, id2: Long): Boolean {
-        val similarComments = similarCommentRepository!!.findAll()
-
-        similarComments.forEach { similarComment ->
-            run {
-                if (similarComment.firstCommentId == id1 && similarComment.secondCommentId == id2) {
-                    return true
-                } else if (similarComment.firstCommentId == id2 && similarComment.secondCommentId == id1) {
-                    return true
-                }
-            }
+        val similarComment = similarComments!!.find { similarComment ->
+            (similarComment.firstCommentId == id1 && similarComment.secondCommentId == id2)
+                    || (similarComment.firstCommentId == id2 || similarComment.secondCommentId == id1)
         }
-        return false
+
+        return similarComment != null
     }
 
     fun getSuspiciousCommentsCount(articleId: Long): Int {

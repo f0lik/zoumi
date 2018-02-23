@@ -27,7 +27,7 @@ class TextAnalysisServiceSpec extends Specification {
         articleRepository.findOne(1) >> article1
         articleRepository.findOne(2) >> article2
         similarCommentRepository.findAll() >> []
-
+        similarCommentRepository.findByFirstSecondCommentId(1, 2) >> Optional.empty()
         def result = textAnalysisService.compareArticles(article1.id, article2.id)
 
         then:
