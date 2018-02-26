@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonBackReference
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonManagedReference
 import org.hibernate.validator.constraints.NotBlank
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
@@ -21,7 +24,6 @@ class Article {
 
     @Id
     @Column(name = "article_id")
-    @GeneratedValue
     var id: Long? = null
 
     @NotBlank
@@ -40,6 +42,14 @@ class Article {
     var comments: MutableSet<Comment>? = null
 
     var commentCount: Int? = null
+
+    @Column(nullable = false, updatable = false)
+    @CreatedDate
+    var createdDate: LocalDateTime? = LocalDateTime.of(2017, 12, 12,0,0)
+
+    @Column(nullable = false, updatable = false)
+    @LastModifiedDate
+    var lastFetchedDate: LocalDateTime? = LocalDateTime.of(2017, 12, 12,0,0)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portal_id")

@@ -90,21 +90,7 @@ class TextAnalysisService {
     }
 
     fun getSuspiciousCommentsCount(articleId: Long): Int {
-        val articleComments = articleRepository.findOne(articleId).comments
-        val similarComments = similarCommentRepository!!.findAll()
-        var count = 0
-        articleComments!!.forEach { comment ->
-            run {
-                similarComments.forEach { similarComment ->
-                    run {
-                        if (comment.id == similarComment.firstCommentId || comment.id == similarComment.secondCommentId) {
-                            count++
-                        }
-                    }
-                }
-            }
-        }
-        return count
+        return similarCommentRepository!!.getSuspiciousCommentCount(articleId)
     }
 
     fun getSuspiciousComments(articleId: Long): HashMap<Comment, Int> {

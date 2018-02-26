@@ -2,6 +2,8 @@ package cz.f0lik.zoumi.model
 
 import com.fasterxml.jackson.annotation.JsonBackReference
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import org.springframework.data.annotation.CreatedDate
+import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
@@ -9,7 +11,6 @@ import javax.persistence.*
 @JsonIgnoreProperties(value = ["article"], allowGetters = true)
 class Comment {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "comment_id")
     var id: Long? = null
 
@@ -18,6 +19,10 @@ class Comment {
 
     @Column(name = "commentText", columnDefinition = "text")
     var commentText: String? = null
+
+    @Column(nullable = false, updatable = false)
+    @CreatedDate
+    var created: LocalDateTime? = LocalDateTime.of(2017, 12, 12,0,0)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id", nullable = false)

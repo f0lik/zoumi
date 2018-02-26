@@ -26,8 +26,6 @@ class AppController {
 
     @GetMapping(value = ["/"])
     fun index(model: Model): String {
-        val size = articleRepository.findAll().size
-        model.addAttribute("artCount", size)
         return "index"
     }
 

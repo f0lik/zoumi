@@ -32,6 +32,7 @@ class ArticleTest {
     fun shouldContainArticle() {
         val article1 = Article("Title", "Anotation", "www.seznam.cz")
         article1.comments = HashSet()
+        article1.id = 3
         val article = repository!!.save(article1)
 
         assertEquals("Title", article.title)
@@ -42,10 +43,12 @@ class ArticleTest {
     @Test
     fun shouldFindArticleById() {
         val article1 = Article("Title", "Anotation", "www.seznam.cz")
+        article1.id = 1
         article1.comments = HashSet()
         entityManager!!.persist(article1)
 
         val article2 = Article("None", "My text", "www.idnes.cz")
+        article2.id = 2
         entityManager!!.persist(article2)
 
         val foundArticle = repository!!.findOne(article2.id)
