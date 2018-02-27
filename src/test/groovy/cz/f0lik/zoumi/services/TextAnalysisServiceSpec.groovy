@@ -7,6 +7,8 @@ import cz.f0lik.zoumi.repository.SimilarCommentRepository
 import org.thymeleaf.util.SetUtils
 import spock.lang.Specification
 
+import java.time.LocalDateTime
+
 class TextAnalysisServiceSpec extends Specification {
     SimilarCommentRepository similarCommentRepository = Mock(SimilarCommentRepository)
     ArticleRepository articleRepository = Mock(ArticleRepository)
@@ -14,7 +16,7 @@ class TextAnalysisServiceSpec extends Specification {
             new TextAnalysisService(articleRepository: articleRepository,
                     similarCommentRepository: similarCommentRepository)
 
-    def "CompareArticles should return true if exactly comments are likely to be similar"() {
+    def "CompareArticles should return false if exactly comments are likely to be similar but date is same"() {
 
         when:
         def article1 = new Article()
@@ -31,7 +33,49 @@ class TextAnalysisServiceSpec extends Specification {
         def result = textAnalysisService.compareArticles(article1.id, article2.id)
 
         then:
+        !result
+    }
+
+    def "CompareArticles should return true if exactly comments are likely to be similar"() {
+
+        when:
+        def article1 = new Article()
+        article1.id = 1
+        article1.comments = SetUtils.singletonSet(new Comment(id: 1, commentText: "Ahoj, jsem uplne stejny",
+                created: LocalDateTime.now(), article: article1))
+
+        def article2 = new Article()
+        article2.id = 2
+        article2.comments = SetUtils.singletonSet(new Comment(id: 2, commentText: "Hoj, jsem uplne stejny", article: article2))
+        articleRepository.findOne(1) >> article1
+        articleRepository.findOne(2) >> article2
+        similarCommentRepository.findAll() >> []
+        similarCommentRepository.findByFirstSecondCommentId(1, 2) >> Optional.empty()
+        def result = textAnalysisService.compareArticles(article1.id, article2.id)
+
+        then:
         result
+    }
+
+    def "CompareArticles should return false if comments are totally different"() {
+
+        when:
+        def article1 = new Article()
+        article1.id = 1
+        article1.comments = SetUtils.singletonSet(new Comment(id: 1, commentText: "Ahoj, jsem uplne stejny",
+                created: LocalDateTime.now(), article: article1))
+
+        def article2 = new Article()
+        article2.id = 2
+        article2.comments = SetUtils.singletonSet(new Comment(id: 2, commentText: "Java je po Kotlinu nejlepsi jazyk", article: article2))
+        articleRepository.findOne(1) >> article1
+        articleRepository.findOne(2) >> article2
+        similarCommentRepository.findAll() >> []
+        similarCommentRepository.findByFirstSecondCommentId(1, 2) >> Optional.empty()
+        def result = textAnalysisService.compareArticles(article1.id, article2.id)
+
+        then:
+        !result
     }
 }
 

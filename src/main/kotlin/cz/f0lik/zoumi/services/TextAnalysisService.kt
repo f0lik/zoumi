@@ -33,7 +33,11 @@ class TextAnalysisService {
 
         similarComments = similarCommentRepository!!.findAll()
 
-        firstArticle.comments!!.forEach { firstComment ->
+        val newerComments = firstArticle.comments!!.filter {
+            comment -> comment.created!! > firstArticle.lastFetchedDate
+        }
+
+        newerComments.forEach { firstComment ->
             run {
                 val callableSimilarityTasks = ArrayList<Callable<Boolean>>()
                 secondArticle.comments!!.forEach inner@ { secondComment ->

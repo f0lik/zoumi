@@ -8,6 +8,7 @@ import cz.f0lik.zoumi.services.DataDownloaderService
 import cz.f0lik.zoumi.services.TextAnalysisService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 import javax.validation.Valid
 
 @RestController
@@ -66,7 +67,9 @@ class ArticleController {
 
     @GetMapping("/articles/fetchAll")
     fun fetchAllNew(){
+        println("Fetch initiated at " + LocalDateTime.now())
         dataDownloaderService.fetchData()
+        println("Fetch completed at " + LocalDateTime.now())
     }
 
     @GetMapping("/articles/updateCurrent")
