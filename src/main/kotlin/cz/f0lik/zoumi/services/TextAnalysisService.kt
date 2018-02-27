@@ -27,15 +27,17 @@ class TextAnalysisService {
     fun compareArticles(firstArticleId: Long, secondArticleId: Long): Boolean {
         val firstArticle = articleRepository.findOne(firstArticleId)
         val secondArticle = articleRepository.findOne(secondArticleId)
-
         var somethingSimilar = false
-        val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1)
-
-        similarComments = similarCommentRepository!!.findAll()
 
         val newerComments = firstArticle.comments!!.filter {
             comment -> comment.created!! > firstArticle.lastFetchedDate
         }
+
+        if (newerComments.isEmpty()) return somethingSimilar
+
+        val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1)
+
+        similarComments = similarCommentRepository!!.findAll()
 
         newerComments.forEach { firstComment ->
             run {

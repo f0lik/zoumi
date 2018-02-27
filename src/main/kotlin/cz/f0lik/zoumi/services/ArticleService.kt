@@ -16,14 +16,4 @@ class ArticleService {
     fun listAllByPage(pageable: Pageable) : Page<Article> {
         return articleRepository.findAll(pageable)
     }
-
-    fun recountCommentSize() {
-        val articles = articleRepository.findAll()
-        articles.forEach { article ->
-            run {
-                article.commentCount = article.comments!!.size
-                articleRepository.save(article)
-            }
-        }
-    }
 }

@@ -61,7 +61,6 @@ class ArticleController {
 
     @GetMapping("/articles/recountArticles")
     fun recountArticles(){
-        articleService.recountCommentSize()
         textAnalysisService?.checkAllArticles()
     }
 
