@@ -19,10 +19,10 @@ class AppController {
     lateinit var articleRepository: ArticleRepository
 
     @Autowired
-    var textService: TextAnalysisService? = null
+    lateinit var textService: TextAnalysisService
 
     @Autowired
-    var articleService: ArticleService? = null
+    lateinit var articleService: ArticleService
 
     @GetMapping(value = ["/"])
     fun index(model: Model): String {
@@ -31,7 +31,7 @@ class AppController {
 
     @GetMapping("/articles")
     fun getArticles(pageable: Pageable): ModelAndView {
-        val commentsPerPage: Page<Article> = articleService!!.listAllByPage(pageable)
+        val commentsPerPage: Page<Article> = articleService.listAllByPage(pageable)
         val modelAndView = ModelAndView()
         modelAndView.viewName = "article_list"
 
@@ -49,8 +49,8 @@ class AppController {
         modelAndView.addObject("anotation", article.anotation)
         modelAndView.addObject("url", article.url)
         modelAndView.addObject("commentsCount", article.comments?.size)
-        modelAndView.addObject("suspiciousCount", textService!!.getSuspiciousCommentsCount(articleId))
-        modelAndView.addObject("suspComments", textService!!.getSuspiciousComments(articleId))
+        modelAndView.addObject("suspiciousCount", textService.getSuspiciousCommentsCount(articleId))
+        modelAndView.addObject("suspComments", textService.getSuspiciousComments(articleId))
 
         return modelAndView
     }

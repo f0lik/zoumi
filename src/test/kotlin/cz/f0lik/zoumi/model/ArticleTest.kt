@@ -16,15 +16,15 @@ import org.springframework.test.context.junit4.SpringRunner
 class ArticleTest {
 
     @Autowired
-    private val entityManager: TestEntityManager? = null
+    lateinit var entityManager: TestEntityManager
 
     @Autowired
-    private val repository: ArticleRepository? = null
+    lateinit var repository: ArticleRepository
 
     @Test
     fun shouldFindNoArticles() {
-        repository?.deleteAll()
-        val customers = repository!!.findAll()
+        repository.deleteAll()
+        val customers = repository.findAll()
         assertThat(customers.size, `is`(equalTo(0)))
     }
 
@@ -33,7 +33,7 @@ class ArticleTest {
         val article1 = Article("Title", "Anotation", "www.seznam.cz")
         article1.comments = HashSet()
         article1.id = 3
-        val article = repository!!.save(article1)
+        val article = repository.save(article1)
 
         assertEquals("Title", article.title)
         assertEquals("Anotation", article.anotation)
@@ -45,13 +45,13 @@ class ArticleTest {
         val article1 = Article("Title", "Anotation", "www.seznam.cz")
         article1.id = 1
         article1.comments = HashSet()
-        entityManager!!.persist(article1)
+        entityManager.persist(article1)
 
         val article2 = Article("None", "My text", "www.idnes.cz")
         article2.id = 2
-        entityManager!!.persist(article2)
+        entityManager.persist(article2)
 
-        val foundArticle = repository!!.findOne(article2.id)
+        val foundArticle = repository.findOne(article2.id)
 
         assertThat(foundArticle, `is`(equalTo(article2)))
     }

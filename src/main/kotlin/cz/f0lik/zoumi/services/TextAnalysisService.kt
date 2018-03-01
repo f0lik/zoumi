@@ -19,7 +19,7 @@ class TextAnalysisService {
     lateinit var articleRepository: ArticleRepository
 
     @Autowired
-    var similarCommentRepository: SimilarCommentRepository? = null
+    lateinit var similarCommentRepository: SimilarCommentRepository
 
     var similarComments: List<SimilarComment>? = null
     val jaccard = Jaccard()
@@ -37,7 +37,7 @@ class TextAnalysisService {
 
         val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1)
 
-        similarComments = similarCommentRepository!!.findAll()
+        similarComments = similarCommentRepository.findAll()
 
         newerComments.forEach { firstComment ->
             run {
@@ -83,7 +83,7 @@ class TextAnalysisService {
         similarComment.secondCommentId = secondComment.id
         similarComment.secondCommentArticleId = secondComment.article!!.id
         similarComment.similarity = (similarity * 100).toInt()
-        similarCommentRepository!!.save(similarComment)
+        similarCommentRepository.save(similarComment)
     }
 
     private fun doSimilarCommentAlreadyExist(id1: Long, id2: Long): Boolean {
@@ -96,11 +96,11 @@ class TextAnalysisService {
     }
 
     fun getSuspiciousCommentsCount(articleId: Long): Int {
-        return similarCommentRepository!!.getSuspiciousCommentCount(articleId)
+        return similarCommentRepository.getSuspiciousCommentCount(articleId)
     }
 
     fun getSuspiciousComments(articleId: Long): HashMap<Comment, Int> {
-        val similarComments = similarCommentRepository!!.findAll()
+        val similarComments = similarCommentRepository.findAll()
         var similarityCommentMap = HashMap<Comment, Int>()
         similarComments.forEach { comment ->
             getSimilarComment(comment, articleId, similarityCommentMap)

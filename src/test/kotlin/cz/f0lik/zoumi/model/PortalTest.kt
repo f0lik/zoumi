@@ -15,10 +15,10 @@ import org.springframework.test.context.junit4.SpringRunner
 class PortalTest {
 
     @Autowired
-    private val entityManager: TestEntityManager? = null
+    lateinit var entityManager: TestEntityManager
 
     @Autowired
-    private val portalRepository: PortalRepository? = null
+    lateinit var portalRepository: PortalRepository
 
     private val PORTAL_NAME = "IDNES-CZ"
 
@@ -26,13 +26,13 @@ class PortalTest {
 
     @Test
     fun shouldFindNoPortals() {
-        val customers = portalRepository!!.findAll()
+        val customers = portalRepository.findAll()
         Assert.assertThat(customers.size, CoreMatchers.`is`(CoreMatchers.equalTo(0)))
     }
 
     @Test
     fun shouldStorePortal() {
-        val foundPortal = portalRepository!!.save(portalBuilder(PORTAL_NAME, PORTAL_URL))
+        val foundPortal = portalRepository.save(portalBuilder(PORTAL_NAME, PORTAL_URL))
         Assert.assertEquals(PORTAL_NAME, foundPortal.name)
         Assert.assertEquals(PORTAL_URL, foundPortal.url)
     }
@@ -40,10 +40,10 @@ class PortalTest {
     @Test
     fun shouldFindPortalById() {
         val firstPortal = portalBuilder(PORTAL_NAME, PORTAL_URL)
-        entityManager!!.persist(firstPortal)
+        entityManager.persist(firstPortal)
         val secondPortal = portalBuilder("Novinky", "http://www.novinky.cz")
-        entityManager!!.persist(secondPortal)
-        val foundArticle = portalRepository!!.findOne(secondPortal.id)
+        entityManager.persist(secondPortal)
+        val foundArticle = portalRepository.findOne(secondPortal.id)
 
         Assert.assertThat(foundArticle, CoreMatchers.`is`(CoreMatchers.equalTo(secondPortal)))
     }
@@ -51,7 +51,7 @@ class PortalTest {
     @Test
     fun shouldContainComments() {
         val firstPortal = portalBuilder(PORTAL_NAME, PORTAL_URL)
-        entityManager!!.persist(firstPortal)
+        entityManager.persist(firstPortal)
 
         val newArticle = Article()
         newArticle.title = "Title"
