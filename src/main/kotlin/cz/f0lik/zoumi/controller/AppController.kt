@@ -3,6 +3,7 @@ package cz.f0lik.zoumi.controller
 import cz.f0lik.zoumi.model.Article
 import cz.f0lik.zoumi.repository.ArticleRepository
 import cz.f0lik.zoumi.services.ArticleService
+import cz.f0lik.zoumi.services.StatsService
 import cz.f0lik.zoumi.services.TextAnalysisService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -22,11 +23,22 @@ class AppController {
     lateinit var textService: TextAnalysisService
 
     @Autowired
+    lateinit var statsService: StatsService
+
+    @Autowired
     lateinit var articleService: ArticleService
 
     @GetMapping(value = ["/"])
-    fun index(model: Model): String {
-        return "index"
+    fun index(model: Model): ModelAndView {
+        val modelAndView = ModelAndView()
+        modelAndView.viewName = "index"
+
+        val allCommentsCount = statsService.getAllCommentsCount()
+        modelAndView.addObject("commentCount", allCommentsCount)
+        modelAndView.addObject("operationCount", allCommentsCount * allCommentsCount)
+        modelAndView.addObject("similarCommentCount", statsService.getSimilarCommentCount())
+        modelAndView.addObject("similarCommentBetweenCount", statsService.getSimilarCommentCountInBetween(65, 95))
+        return modelAndView
     }
 
     @GetMapping("/articles")

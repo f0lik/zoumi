@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">>
 
 <head>
     <meta charset="utf-8">
@@ -14,11 +14,11 @@
 
     <!-- Custom fonts for this template -->
     <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i"
+    <link href="https://fonts.googleapis.com/css?family=Comfortaa:100,100i,300,300i,400,400i,700,700i,900,900i"
           rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="/custom_css/one-page-wonder.css" rel="stylesheet" />
+    <link href="/custom_css/one-page-wonder.css" rel="stylesheet"/>
 
 </head>
 
@@ -50,9 +50,9 @@
 <header class="masthead text-center text-white">
     <div class="masthead-content">
         <div class="container">
-            <h1 class="masthead-heading mb-0">Welcome home, boi.</h1>
-            <h2 class="masthead-subheading mb-0">Will Rock Your Socks Off</h2>
-            <a href="#" class="btn btn-primary btn-xl rounded-pill mt-5">Learn More</a>
+            <h1 class="masthead-heading mb-0">Lžou mi? Ovlivňují ostaní?</h1>
+            <h2 class="masthead-subheading mb-0">Analýza diskuzí českých online portálů</h2>
+            <a href="#statsTop" class="btn btn-primary btn-xl rounded-pill mt-5">Statistiky</a>
         </div>
     </div>
     <div class="bg-circle-1 bg-circle"></div>
@@ -61,46 +61,7 @@
     <div class="bg-circle-4 bg-circle"></div>
 </header>
 
-<section>
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 order-lg-2">
-                <div class="p-5">
-                    <img class="img-fluid rounded-circle" src="/images/01.jpg" alt="">
-                </div>
-            </div>
-            <div class="col-lg-6 order-lg-1">
-                <div class="p-5">
-                    <h2 class="display-4">For those about to rock...</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quod aliquid, mollitia odio veniam sit
-                        iste esse assumenda amet aperiam exercitationem, ea animi blanditiis recusandae! Ratione
-                        voluptatum molestiae adipisci, beatae obcaecati.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section>
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <div class="p-5">
-                    <img class="img-fluid rounded-circle" src="/images/02.jpg" alt="">
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="p-5">
-                    <h2 class="display-4">We salute you!</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quod aliquid, mollitia odio veniam sit
-                        iste esse assumenda amet aperiam exercitationem, ea animi blanditiis recusandae! Ratione
-                        voluptatum molestiae adipisci, beatae obcaecati.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
+<a id="statsTop"></a>
 <section>
     <div class="container">
         <div class="row align-items-center">
@@ -111,28 +72,65 @@
             </div>
             <div class="col-lg-6 order-lg-1">
                 <div class="p-5">
-                    <h2 class="display-4">Let there be rock!</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quod aliquid, mollitia odio veniam sit
-                        iste esse assumenda amet aperiam exercitationem, ea animi blanditiis recusandae! Ratione
-                        voluptatum molestiae adipisci, beatae obcaecati.</p>
+                    <h2 class="display-4">Cože, <span th:text="${commentCount}"></span>?!</h2>
+                    <p>Přesně tak, s tolika komentáři pracuji a provádím nad nimi analýzu. To znamená provést přes
+                        <strong><span th:text="${operationCount}"></span></strong> operací a to dá celkem zabrat, takže se aktualizuji v noci.
+                            :-)</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+<section>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 ">
+                <div class="p-5">
+                    <img class="img-fluid rounded-circle" src="/images/01.jpg" alt="">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="p-5">
+                    <h2 class="display-4">No a co znamená <span th:text="${similarCommentCount}"></span>?</h2>
+                    <p>Tak to je počet komentářů, které algoritmus označil jako podezřelé. To jsou ale i komentáře,
+                        které jsou vloženy vícekrát případně je někdo okopíroval.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 order-lg-2">
+                <div class="p-5">
+                    <img class="img-fluid rounded-circle" src="/images/02.jpg" alt="">
+                </div>
+            </div>
+            <div class="col-lg-6  order-lg-1">
+                <div class="p-5">
+                    <h2 class="display-4">Co těch <span th:text="${similarCommentBetweenCount}"></span>?</h2>
+                    <p>Tak to už jsou opravdu podezřelé komentáře. Tady se podobnost pohybuje mezi <strong>65% a 95%</strong>.Jedná
+                        se o texty, které jsou třeba trochu změněné. Můžou se sem však zamotat i komentáře, které někdo
+                        citoval
+                        a dodal k nim krátký text.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
 <!-- Footer -->
 <footer class="py-5 bg-black">
     <div class="container">
-        <p class="m-0 text-center text-white small">Copyright &copy; Your Website 2018</p>
+        <p class="m-0 text-center text-white small">Copyright &copy; zoumi.cz 2018</p>
     </div>
     <!-- /.container -->
 </footer>
-
-<!-- Bootstrap core JavaScript -->
-<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
-<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
-
 <script src="/jquery/jquery.min.js"></script>
 <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
 

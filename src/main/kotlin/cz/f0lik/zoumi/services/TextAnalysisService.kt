@@ -3,6 +3,7 @@ package cz.f0lik.zoumi.services
 import cz.f0lik.zoumi.model.Comment
 import cz.f0lik.zoumi.model.SimilarComment
 import cz.f0lik.zoumi.repository.ArticleRepository
+import cz.f0lik.zoumi.repository.CommentRepository
 import cz.f0lik.zoumi.repository.SimilarCommentRepository
 import info.debatty.java.stringsimilarity.Jaccard
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +22,9 @@ class TextAnalysisService {
     @Autowired
     lateinit var similarCommentRepository: SimilarCommentRepository
 
+    @Autowired
+    lateinit var commentRepository: CommentRepository
+
     var similarComments: List<SimilarComment>? = null
     val jaccard = Jaccard()
 
@@ -30,10 +34,13 @@ class TextAnalysisService {
         var somethingSimilar = false
 
         val newerComments = firstArticle.comments!!.filter {
-            comment -> comment.created!! > firstArticle.lastFetchedDate
+            comment -> comment.isNew == true
         }
 
         if (newerComments.isEmpty()) return somethingSimilar
+
+        newerComments.forEach {comment-> comment.isNew = false}
+        commentRepository.save(newerComments)
 
         val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1)
 

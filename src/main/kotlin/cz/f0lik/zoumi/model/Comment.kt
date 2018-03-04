@@ -24,6 +24,9 @@ class Comment {
     @CreatedDate
     var created: LocalDateTime? = LocalDateTime.of(2017, 12, 12,0,0)
 
+    @Column
+    var isNew: Boolean? = true
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id", nullable = false)
     @JsonBackReference

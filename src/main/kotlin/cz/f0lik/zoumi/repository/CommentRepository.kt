@@ -9,4 +9,7 @@ import java.util.*
 interface CommentRepository : JpaRepository<Comment, Long> {
     @Query("SELECT u.created from Comment u where u.article.id = ?1")
     fun getCommentsCreatedTime(articleId: Long): Optional<List<LocalDateTime>>
+
+    @Query("SELECT COUNT(*) from Comment")
+    fun getCommentCount(): Long
 }

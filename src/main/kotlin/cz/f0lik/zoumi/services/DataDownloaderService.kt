@@ -122,6 +122,7 @@ class DataDownloaderService {
             comment.commentText = resultSet.getString("text")
             comment.created = resultSet.getTimestamp("created").toLocalDateTime()
             comment.article = articleRepository.findOne(articleId)
+            comment.isNew = true
             commentRepository.save(comment)
         }
         threadDbConnection.close()
