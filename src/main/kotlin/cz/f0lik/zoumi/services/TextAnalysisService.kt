@@ -8,6 +8,7 @@ import cz.f0lik.zoumi.repository.SimilarCommentRepository
 import info.debatty.java.stringsimilarity.Jaccard
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import kotlin.collections.HashMap
@@ -33,13 +34,13 @@ class TextAnalysisService {
         val secondArticle = articleRepository.findOne(secondArticleId)
         var somethingSimilar = false
 
-        val newerComments = firstArticle.comments!!.filter {
-            comment -> comment.isNew == true
+        val newerComments = firstArticle.comments!!.filter { comment ->
+            comment.isNew == true
         }
 
         if (newerComments.isEmpty()) return somethingSimilar
 
-        newerComments.forEach {comment-> comment.isNew = false}
+        newerComments.forEach { comment -> comment.isNew = false }
         commentRepository.save(newerComments)
 
         val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1)
@@ -49,7 +50,7 @@ class TextAnalysisService {
         newerComments.forEach { firstComment ->
             run {
                 val callableSimilarityTasks = ArrayList<Callable<Boolean>>()
-                secondArticle.comments!!.forEach inner@ { secondComment ->
+                secondArticle.comments!!.forEach inner@{ secondComment ->
                     run {
                         if (firstComment.id == secondComment.id) {
                             return@inner
@@ -106,28 +107,22 @@ class TextAnalysisService {
         return similarCommentRepository.getSuspiciousCommentCount(articleId)
     }
 
-    fun getSuspiciousComments(articleId: Long): HashMap<Comment, Int> {
-        val similarComments = similarCommentRepository.findAll()
-        var similarityCommentMap = HashMap<Comment, Int>()
-        similarComments.forEach { comment ->
-            getSimilarComment(comment, articleId, similarityCommentMap)
+    fun getSuspiciousComments(articleId: Long): HashMap<Pair<Comment, Comment>, Int> {
+        val suspiciousComments = similarCommentRepository.getSuspiciousComments(articleId)
+        val similarityCommentMap = HashMap<Pair<Comment, Comment>, Int>()
+        if (!suspiciousComments.isPresent) {
+            return similarityCommentMap
         }
+
+       suspiciousComments.get().forEach { simmilarComment ->
+            run {
+                val first = commentRepository.findOne(simmilarComment.firstCommentId)
+                val second = commentRepository.findOne(simmilarComment.secondCommentId)
+                similarityCommentMap.put(Pair(first, second), simmilarComment.similarity!!)
+            }
+        }
+
         return similarityCommentMap
-    }
-
-    private fun getSimilarComment(comment: SimilarComment, articleId: Long, commentSimMap: HashMap<Comment, Int>) {
-        if (comment.firstCommentArticleId == articleId) {
-            findComment(articleId, comment.firstCommentId!!, commentSimMap, comment.similarity!!)
-        }
-        if (comment.secondCommentArticleId == articleId) {
-            findComment(articleId, comment.secondCommentId!!, commentSimMap, comment.similarity!!)
-        }
-    }
-
-    private fun findComment(articleId: Long, commentId: Long, commentSimMap: HashMap<Comment, Int>, similarity: Int) {
-        val comments = articleRepository.findOne(articleId).comments
-        val foundComment = comments!!.find { comment -> comment.id == commentId }
-        commentSimMap[foundComment!!] = similarity
     }
 
     fun checkAllArticles() {

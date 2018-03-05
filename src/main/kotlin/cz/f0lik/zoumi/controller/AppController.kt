@@ -54,6 +54,16 @@ class AppController {
     @GetMapping("/article/{id}")
     fun getArticle(@PathVariable(value = "id") articleId: Long, model: Model): ModelAndView {
         val article: Article = articleRepository.findOne(articleId) ?: return ModelAndView()
+        return getArticleView(article, articleId, false)
+    }
+
+    @GetMapping("/article/{id}/all")
+    fun getArticleWithComments(@PathVariable(value = "id") articleId: Long, model: Model): ModelAndView {
+        val article: Article = articleRepository.findOne(articleId) ?: return ModelAndView()
+        return getArticleView(article, articleId, true)
+    }
+
+    private fun getArticleView(article: Article, articleId: Long, showComments: Boolean): ModelAndView {
         val modelAndView = ModelAndView()
         modelAndView.viewName = "article"
         modelAndView.addObject("title", article.title)
@@ -62,8 +72,9 @@ class AppController {
         modelAndView.addObject("url", article.url)
         modelAndView.addObject("commentsCount", article.comments?.size)
         modelAndView.addObject("suspiciousCount", textService.getSuspiciousCommentsCount(articleId))
-        modelAndView.addObject("suspComments", textService.getSuspiciousComments(articleId))
-
+        if (showComments) {
+            modelAndView.addObject("suspComments", textService.getSuspiciousComments(articleId))
+        }
         return modelAndView
     }
 }
