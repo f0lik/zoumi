@@ -60,6 +60,11 @@ class ArticleController {
         textAnalysisService.checkAllArticles()
     }
 
+    @GetMapping("/articles/recountComments")
+    fun recountComments(){
+        textAnalysisService.updateCommentCount()
+    }
+
     @GetMapping("/articles/fetchAll")
     fun fetchAllNew(){
         println("Fetch initiated at " + LocalDateTime.now())

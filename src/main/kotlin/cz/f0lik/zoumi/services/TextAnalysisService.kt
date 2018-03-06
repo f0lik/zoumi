@@ -27,7 +27,7 @@ class TextAnalysisService {
     lateinit var commentRepository: CommentRepository
 
     var similarComments: List<SimilarComment>? = null
-    val jaccard = Jaccard()
+    val jaccardSimilarityAlg = Jaccard()
 
     fun compareArticles(firstArticleId: Long, secondArticleId: Long): Boolean {
         val firstArticle = articleRepository.findOne(firstArticleId)
@@ -76,7 +76,7 @@ class TextAnalysisService {
     }
 
     private fun checkSimilarity(firstComment: Comment, secondComment: Comment): Boolean {
-        val similarity = jaccard.similarity(firstComment.commentText, secondComment.commentText)
+        val similarity = jaccardSimilarityAlg.similarity(firstComment.commentText, secondComment.commentText)
         if (similarity > SIMILARITY_LIMIT) {
             createSimilarComment(firstComment, secondComment, similarity)
             return true
@@ -99,7 +99,6 @@ class TextAnalysisService {
             (similarComment.firstCommentId == id1 && similarComment.secondCommentId == id2)
                     || (similarComment.firstCommentId == id2 || similarComment.secondCommentId == id1)
         }
-
         return similarComment != null
     }
 
@@ -114,14 +113,13 @@ class TextAnalysisService {
             return similarityCommentMap
         }
 
-       suspiciousComments.get().forEach { simmilarComment ->
+       suspiciousComments.get().forEach { similarComment ->
             run {
-                val first = commentRepository.findOne(simmilarComment.firstCommentId)
-                val second = commentRepository.findOne(simmilarComment.secondCommentId)
-                similarityCommentMap.put(Pair(first, second), simmilarComment.similarity!!)
+                val first = commentRepository.findOne(similarComment.firstCommentId)
+                val second = commentRepository.findOne(similarComment.secondCommentId)
+                similarityCommentMap.put(Pair(first, second), similarComment.similarity!!)
             }
         }
-
         return similarityCommentMap
     }
 
@@ -134,6 +132,7 @@ class TextAnalysisService {
     fun updateCommentCount() {
         articleRepository.findAll().forEach { article ->
             article.commentCount = commentRepository.getCommentCount(article.id!!)
+            articleRepository.save(article)
         }
     }
 }
