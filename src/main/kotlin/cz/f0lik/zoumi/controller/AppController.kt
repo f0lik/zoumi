@@ -3,16 +3,18 @@ package cz.f0lik.zoumi.controller
 import cz.f0lik.zoumi.model.Article
 import cz.f0lik.zoumi.repository.ArticleRepository
 import cz.f0lik.zoumi.services.ArticleService
+import cz.f0lik.zoumi.services.Pager
 import cz.f0lik.zoumi.services.StatsService
 import cz.f0lik.zoumi.services.TextAnalysisService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.data.domain.PageRequest
+import org.springframework.web.bind.annotation.RequestParam
+import java.util.*
 
 @Controller
 class AppController {
@@ -28,6 +30,10 @@ class AppController {
     @Autowired
     lateinit var articleService: ArticleService
 
+    private val INITIAL_PAGE = 0
+    private val INITIAL_PAGE_SIZE = 5
+    private val PAGE_SIZES = intArrayOf(5, 10, 20)
+
     @GetMapping(value = ["/"])
     fun index(model: Model): ModelAndView {
         val modelAndView = ModelAndView()
@@ -42,12 +48,19 @@ class AppController {
     }
 
     @GetMapping("/articles")
-    fun getArticles(pageable: Pageable): ModelAndView {
-        val commentsPerPage: Page<Article> = articleService.listAllByPage(pageable)
-        val modelAndView = ModelAndView()
-        modelAndView.viewName = "article_list"
+    fun getArticles(@RequestParam("pageSize") pageSize: Optional<Int>,
+                    @RequestParam("page")page: Optional<Int>): ModelAndView {
+        val modelAndView = ModelAndView("article_list")
+        val evalPageSize = pageSize.orElse(INITIAL_PAGE_SIZE)
+        val evalPage = if (page.orElse(0) < 1) INITIAL_PAGE else page.get() - 1
 
-        modelAndView.addObject("articles", commentsPerPage.content)
+        val articles = articleService.listAllByPage(PageRequest(evalPage, evalPageSize))
+        val pager = Pager(articles.totalPages, articles.number, 5   )
+
+        modelAndView.addObject("articles", articles)
+        modelAndView.addObject("selectedPageSize", evalPageSize)
+        modelAndView.addObject("pageSizes", PAGE_SIZES)
+        modelAndView.addObject("pager", pager)
         return modelAndView
     }
 

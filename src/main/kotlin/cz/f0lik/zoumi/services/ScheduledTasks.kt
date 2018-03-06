@@ -17,5 +17,13 @@ class ScheduledTasks {
     fun checkArticleRoutine() {
         println("Starting check at " + dateFormat.format(Date()))
         textAnalysisService.checkAllArticles()
+        println("Ending check at " + dateFormat.format(Date()))
+    }
+
+    @Scheduled(cron = "0 0 6 * * ?")
+    fun checkCommentCountRoutine() {
+        println("Comment recount started at " + dateFormat.format(Date()))
+        textAnalysisService.updateCommentCount()
+        println("Comment recount ended at " + dateFormat.format(Date()))
     }
 }

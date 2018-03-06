@@ -130,4 +130,10 @@ class TextAnalysisService {
             compareArticles(article.id!!, article.id!!)
         }
     }
+
+    fun updateCommentCount() {
+        articleRepository.findAll().forEach { article ->
+            article.commentCount = commentRepository.getCommentCount(article.id!!)
+        }
+    }
 }
