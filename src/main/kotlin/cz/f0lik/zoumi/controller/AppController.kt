@@ -57,7 +57,10 @@ class AppController {
                     @RequestParam("sortAttribute") sortAttribute: Optional<String>,
                     @RequestParam("sortDirection") sortDirection: Optional<String>): ModelAndView {
         val modelAndView = ModelAndView("article_list")
-        val evaluatedPageSize = pageSize.orElse(INITIAL_PAGE_SIZE)
+        val evaluatedPageSize = when {
+            pageSize.orElse(INITIAL_PAGE_SIZE) > 20 -> INITIAL_PAGE_SIZE
+            else -> pageSize.orElse(INITIAL_PAGE_SIZE)
+        }
         val evaluatedPage = if (page.orElse(0) < 1) INITIAL_PAGE else page.get() - 1
         val evaluatedSortAttribute = sortAttribute.orElse("similarCommentCount")
         val evaluatedSortDirection = sortDirection.orElse(Sort.Direction.DESC.toString())
