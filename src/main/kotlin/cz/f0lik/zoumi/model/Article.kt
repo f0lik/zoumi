@@ -43,6 +43,8 @@ class Article {
 
     var commentCount: Int? = null
 
+    var similarCommentCount: Int? = null
+
     @Column(nullable = false, updatable = false)
     @CreatedDate
     var createdDate: LocalDateTime? = LocalDateTime.of(2017, 12, 12,0,0)

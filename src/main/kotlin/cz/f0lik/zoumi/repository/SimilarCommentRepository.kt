@@ -12,7 +12,7 @@ interface SimilarCommentRepository : JpaRepository<SimilarComment, Long> {
     fun findByFirstSecondCommentId(firstCommentId: Long, secondCommentId: Long): Optional<SimilarComment>
 
     @Query("SELECT COUNT(*) FROM SimilarComment t where t.firstCommentArticleId = ?1 OR t.secondCommentArticleId = ?1")
-    fun getSuspiciousCommentCount(commentId: Long): Int
+    fun getSuspiciousCommentCount(articleId: Long): Int
 
     @Query("SELECT COUNT(*) FROM SimilarComment")
     fun getSuspiciousCommentCount(): Int

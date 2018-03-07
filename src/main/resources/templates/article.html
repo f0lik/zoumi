@@ -1,29 +1,23 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
+    <meta name="description" content="Analýza diskuzí českých online portálů">
     <meta name="author" content="">
 
     <title>Článek - Zoumi.cz</title>
 
-    <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.css"/>
-
     <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Comfortaa:100,100i,300,300i,400,400i,700,700i,900,900i"
           rel="stylesheet">
-
-    <!-- Custom styles for this template -->
     <link href="/custom_css/blog-post.css" rel="stylesheet"/>
 
 </head>
 
 <body>
 
-<!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
     <div class="container">
         <a class="navbar-brand" href="/">ZOUMI.CZ</a>
@@ -33,10 +27,10 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item active">
+                <li class="nav-item">
                     <a class="nav-link" href="/">Domů</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="/articles">Články
                         <span class="sr-only">(current)</span>
                     </a>
@@ -46,33 +40,27 @@
     </div>
 </nav>
 
-<!-- Page Content -->
 <div class="container">
-
     <div class="row">
-
-        <!-- Post Content Column -->
         <div class="col-lg-8">
-
-            <!-- Title -->
-            <h1 class="mt-4"><span th:text="${title}"/></h1>
-
-            <!-- Author -->
+            <h1 class="mt-4"><span th:text="${article.title}"/></h1>
             <p class="lead">
-                <strong>Originální zdroj:</strong> <a th:href="${url}" th:text="${url}"/>
+                <strong>Originální zdroj:</strong> <a th:href="${article.url}" th:text="${article.url}"/>
             </p>
-
             <hr>
-
-            <!-- Post Content -->
             <p class="lead">
-                <span th:text="${anotation}"/>
+                <span th:text="${article.anotation}"/>
             </p>
 
             <hr>
             <h2>Statistiky</h2>
-            <p>Počet komentářů: <span th:text="${commentsCount}"/></p>
-            <p>Počet podezřelých komentářů: <span th:text="${suspiciousCount}"/></p>
+            <p>Počet komentářů: <span th:text="${article.commentCount}"/></p>
+            <p>Počet podezřelých komentářů:
+            <span th:switch="${suspiciousCount}">
+                <span th:case="0"><span class="text-success" th:text="${suspiciousCount}"></span> <i class="fas fa-check-circle"></i></span>
+                <span th:case="*"><span class="text-danger" th:text="${suspiciousCount}"></span> <i class="fas fa-exclamation-triangle"></i></span>
+            </span>
+            </p>
 
             <span th:each="commentText : ${suspComments}">
                 <div class="media mb-4">
@@ -87,26 +75,22 @@
                         <h5 class="mt-0" th:text="${commentText.key.second.author}"></h5>
                         <p th:text="${commentText.key.second.commentText}"></p>
                     </div>
-                    <strong>Podobnost textu: </strong> <span th:text="${commentText.value}"></span>%
+                    <strong>Podobnost textu:</strong><span th:text="${commentText.value}"></span>%
                 </div>
                 <hr>
             </span>
         </div>
     </div>
-    <!-- /.row -->
-
 </div>
-<!-- /.container -->
 
-<!-- Footer -->
-<footer class="py-5 bg-dark">
+<footer class="py-5 bg-black">
     <div class="container">
-        <p class="m-0 text-center text-white small">Copyright &copy; zoumi.cz 2018</p>
+        <p class="m-0 text-center text-white small">Copyright &copy; zoumi.cz 2018 | fol.pavel(at)gmail.com</p>
+        <p class="m-0 text-center text-muted small">Disclaimer: Tato aplikace nezískává data k analýze přímo.
+            Analýza je prováděna v rámci akademické (diplomové) práce a výsledky neslouží ke komerčnímu užití. </p>
     </div>
-    <!-- /.container -->
 </footer>
 
-<!-- Bootstrap core JavaScript -->
 <script src="/jquery/jquery.min.js"></script>
 <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script defer src="/fontawesome-all.js"></script>

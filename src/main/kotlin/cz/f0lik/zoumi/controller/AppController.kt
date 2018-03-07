@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.web.bind.annotation.RequestParam
 import java.util.*
 
@@ -33,6 +34,8 @@ class AppController {
     private val INITIAL_PAGE = 0
     private val INITIAL_PAGE_SIZE = 5
     private val PAGE_SIZES = intArrayOf(5, 10, 20)
+    val sortAttributesMap = mapOf("Počet komentářů" to "commentCount", "Počet podobných komentářů" to "similarCommentCount")
+    val sortDirectionMap = mapOf("Vzestupně" to "ASC", "Sestupně" to "DESC")
 
     @GetMapping(value = ["/"])
     fun index(model: Model): ModelAndView {
@@ -43,23 +46,33 @@ class AppController {
         modelAndView.addObject("commentCount", allCommentsCount)
         modelAndView.addObject("operationCount", allCommentsCount * allCommentsCount)
         modelAndView.addObject("similarCommentCount", statsService.getSimilarCommentCount())
-        modelAndView.addObject("similarCommentBetweenCount", statsService.getSimilarCommentCountInBetween(65, 95))
+        modelAndView.addObject("similarCommentBetweenCount",
+                statsService.getSimilarCommentCountInBetween(60, 90))
         return modelAndView
     }
 
     @GetMapping("/articles")
     fun getArticles(@RequestParam("pageSize") pageSize: Optional<Int>,
-                    @RequestParam("page")page: Optional<Int>): ModelAndView {
+                    @RequestParam("page")page: Optional<Int>,
+                    @RequestParam("sortAttribute") sortAttribute: Optional<String>,
+                    @RequestParam("sortDirection") sortDirection: Optional<String>): ModelAndView {
         val modelAndView = ModelAndView("article_list")
-        val evalPageSize = pageSize.orElse(INITIAL_PAGE_SIZE)
-        val evalPage = if (page.orElse(0) < 1) INITIAL_PAGE else page.get() - 1
+        val evaluatedPageSize = pageSize.orElse(INITIAL_PAGE_SIZE)
+        val evaluatedPage = if (page.orElse(0) < 1) INITIAL_PAGE else page.get() - 1
+        val evaluatedSortAttribute = sortAttribute.orElse("similarCommentCount")
+        val evaluatedSortDirection = sortDirection.orElse(Sort.Direction.DESC.toString())
 
-        val articles = articleService.listAllByPage(PageRequest(evalPage, evalPageSize))
-        val pager = Pager(articles.totalPages, articles.number, 5   )
+        val articles = articleService.listAllByPage(PageRequest(evaluatedPage, evaluatedPageSize,
+                Sort.Direction.fromString(evaluatedSortDirection), evaluatedSortAttribute))
+        val pager = Pager(articles.totalPages, articles.number, 5)
 
         modelAndView.addObject("articles", articles)
-        modelAndView.addObject("selectedPageSize", evalPageSize)
+        modelAndView.addObject("selectedPageSize", evaluatedPageSize)
         modelAndView.addObject("pageSizes", PAGE_SIZES)
+        modelAndView.addObject("sortAttributes", sortAttributesMap)
+        modelAndView.addObject("selectedSortAttribute", evaluatedSortAttribute)
+        modelAndView.addObject("sortDirections", sortDirectionMap)
+        modelAndView.addObject("selectedSortDirection", evaluatedSortDirection)
         modelAndView.addObject("pager", pager)
         return modelAndView
     }
@@ -79,11 +92,7 @@ class AppController {
     private fun getArticleView(article: Article, articleId: Long, showComments: Boolean): ModelAndView {
         val modelAndView = ModelAndView()
         modelAndView.viewName = "article"
-        modelAndView.addObject("title", article.title)
-        modelAndView.addObject("portal", article.portal)
-        modelAndView.addObject("anotation", article.anotation)
-        modelAndView.addObject("url", article.url)
-        modelAndView.addObject("commentsCount", article.comments?.size)
+        modelAndView.addObject("article", article)
         modelAndView.addObject("suspiciousCount", textService.getSuspiciousCommentsCount(articleId))
         if (showComments) {
             modelAndView.addObject("suspComments", textService.getSuspiciousComments(articleId))

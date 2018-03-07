@@ -132,6 +132,7 @@ class TextAnalysisService {
     fun updateCommentCount() {
         articleRepository.findAll().forEach { article ->
             article.commentCount = commentRepository.getCommentCount(article.id!!)
+            article.similarCommentCount = similarCommentRepository.getSuspiciousCommentCount(article.id!!)
             articleRepository.save(article)
         }
     }
