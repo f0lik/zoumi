@@ -44,7 +44,7 @@
     <div class="row">
         <div class="col-lg-8">
             <h1 class="mt-4"><span th:text="${article.title}"/></h1>
-            <p class="lead">
+            <p class="lead small">
                 <strong>Originální zdroj:</strong> <a th:href="${article.url}" th:text="${article.url}"/>
             </p>
             <hr>
@@ -67,15 +67,17 @@
                     <div class="d-flex mr-2"><i class="fas fa-user-circle fa-2x"></i></div>
                     <div class="media-body">
                         <h5 class="mt-0" th:text="${commentText.key.first.author}"></h5>
+                        <p th:text="${#temporals.format(commentText.key.first.created, 'dd-MM-yyyy HH:mm')}" class="font-weight-light small"></p>
                         <p th:text="${commentText.key.first.commentText}"></p>
                     </div>
 
                     <div class="d-flex mr-2"><i class="fas fa-user-circle fa-2x"></i></div>
                     <div class="media-body">
                         <h5 class="mt-0" th:text="${commentText.key.second.author}"></h5>
+                        <p th:text="${#temporals.format(commentText.key.second.created, 'dd-MM-yyyy HH:mm')}" class="font-weight-light small"></p>
                         <p th:text="${commentText.key.second.commentText}"></p>
                     </div>
-                    <strong>Podobnost textu:</strong><span th:text="${commentText.value}"></span>%
+                    <strong>Podobnost textu:</strong><span th:text="${commentText.value}"> </span>%
                 </div>
                 <hr>
             </span>
