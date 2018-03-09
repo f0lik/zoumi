@@ -47,11 +47,17 @@ class TextAnalysisService {
 
         similarComments = similarCommentRepository.findAll()
 
+        val processedPairIds = HashSet<String>()
+
         newerComments.forEach { firstComment ->
             run {
                 val callableSimilarityTasks = ArrayList<Callable<Boolean>>()
                 secondArticle.comments!!.forEach inner@{ secondComment ->
                     run {
+                        val pairKey = Math.min(firstComment.id!!, secondComment.id!!).toString() + "_" + Math.max(firstComment.id!!, secondComment.id!!)
+                        if (processedPairIds.contains(pairKey)) {
+                            return@inner
+                        }
                         if (firstComment.id == secondComment.id) {
                             return@inner
                         }
@@ -61,6 +67,7 @@ class TextAnalysisService {
                         if (doSimilarCommentAlreadyExist(firstComment.id!!, secondComment.id!!)) {
                             return@inner
                         }
+                        processedPairIds.add(pairKey)
                         val callableSimilarityTask = Callable {
                             checkSimilarity(firstComment, secondComment)
                         }
