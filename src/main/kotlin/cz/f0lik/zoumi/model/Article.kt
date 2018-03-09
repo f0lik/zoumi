@@ -34,6 +34,8 @@ class Article {
     @Column(columnDefinition = "text")
     var anotation: String? = null
 
+    var keyWords: String = ""
+
     @NotBlank
     var url: String? = null
 

@@ -16,4 +16,8 @@ class ArticleService {
     fun listAllByPage(pageable: Pageable) : Page<Article> {
         return articleRepository.findAll(pageable)
     }
+
+    fun listAllByPage(searchWord: String, pageable: Pageable) : Page<Article> {
+        return articleRepository.findByKeyWordsContaining(searchWord, pageable)
+    }
 }

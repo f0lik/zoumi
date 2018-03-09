@@ -2,6 +2,7 @@ $(document).ready(function() {
     changePageAndSize();
     changePageAndSizeAndSort();
     changeSortDirection();
+    clickSeach();
 });
 
 function changePageAndSize() {
@@ -10,10 +11,16 @@ function changePageAndSize() {
     });
 }
 
+function clickSeach() {
+    $('#searchButton').click(function(evt) {
+        window.location.replace("/articles/?search=" + document.getElementById("searchTextBox").value);
+    });
+}
+
 function changePageAndSizeAndSort() {
     $('#sortAttributeSelect').change(function(evt) {
         window.location.replace("/articles/?pageSize=" + document.getElementById("pageSizeSelect").value +
-            "&page="+ findGetParameter("page")
+            "&page="+ findGetParameter("page", 1)
             + "&sortAttribute=" + this.value);
     });
 }
@@ -21,13 +28,13 @@ function changePageAndSizeAndSort() {
 function changeSortDirection() {
     $('#sortDirection').change(function(evt) {
         window.location.replace("/articles/?pageSize=" + document.getElementById("pageSizeSelect").value +
-            "&page=" +findGetParameter("page") + "&sortAttribute=" + document.getElementById("sortAttributeSelect").value +
+            "&page=" + findGetParameter("page", 1) + "&sortAttribute=" + document.getElementById("sortAttributeSelect").value +
             "&sortDirection=" + this.value);
     });
 }
 
-function findGetParameter(parameterName) {
-    var result = 1,
+function findGetParameter(parameterName, defaultValue) {
+    var result = defaultValue,
         tmp = [];
     location.search
         .substr(1)

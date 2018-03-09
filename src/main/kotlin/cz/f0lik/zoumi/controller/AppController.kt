@@ -55,7 +55,8 @@ class AppController {
     fun getArticles(@RequestParam("pageSize") pageSize: Optional<Int>,
                     @RequestParam("page")page: Optional<Int>,
                     @RequestParam("sortAttribute") sortAttribute: Optional<String>,
-                    @RequestParam("sortDirection") sortDirection: Optional<String>): ModelAndView {
+                    @RequestParam("sortDirection") sortDirection: Optional<String>,
+                    @RequestParam("search") search: Optional<String>): ModelAndView {
         val modelAndView = ModelAndView("article_list")
         val evaluatedPageSize = when {
             pageSize.orElse(INITIAL_PAGE_SIZE) > 20 -> INITIAL_PAGE_SIZE
@@ -65,8 +66,12 @@ class AppController {
         val evaluatedSortAttribute = sortAttribute.orElse("similarCommentCount")
         val evaluatedSortDirection = sortDirection.orElse(Sort.Direction.DESC.toString())
 
-        val articles = articleService.listAllByPage(PageRequest(evaluatedPage, evaluatedPageSize,
-                Sort.Direction.fromString(evaluatedSortDirection), evaluatedSortAttribute))
+        val articles = when {
+            search.isPresent -> articleService.listAllByPage(search.get(), PageRequest(evaluatedPage, evaluatedPageSize,
+                    Sort.Direction.fromString(evaluatedSortDirection), evaluatedSortAttribute))
+            else -> articleService.listAllByPage(PageRequest(evaluatedPage, evaluatedPageSize,
+                    Sort.Direction.fromString(evaluatedSortDirection), evaluatedSortAttribute))
+        }
         val pager = Pager(articles.totalPages, articles.number, 5)
 
         modelAndView.addObject("articles", articles)
