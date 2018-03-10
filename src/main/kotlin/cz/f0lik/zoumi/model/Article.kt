@@ -14,7 +14,7 @@ import javax.persistence.*
 @JsonIgnoreProperties(value = ["comments"], allowGetters = true)
 class Article {
 
-    constructor(title: String, anotation: String, url: String): this() {
+    constructor(title: String, anotation: String, url: String) : this() {
         this.title = title
         this.anotation = anotation
         this.url = url
@@ -28,32 +28,33 @@ class Article {
 
     @NotBlank
     @Column(columnDefinition = "text")
-    var title: String? = null
+    var title: String = ""
 
     @NotBlank
     @Column(columnDefinition = "text")
-    var anotation: String? = null
+    var anotation: String = ""
 
+    @Column(columnDefinition = "text")
     var keyWords: String = ""
 
     @NotBlank
-    var url: String? = null
+    var url: String = ""
 
     @OneToMany(cascade = arrayOf(CascadeType.ALL), fetch = FetchType.EAGER, mappedBy = "article")
     @JsonManagedReference
     var comments: MutableSet<Comment>? = null
 
-    var commentCount: Int? = null
+    var commentCount: Int = 0
 
-    var similarCommentCount: Int? = null
+    var similarCommentCount: Int = 0
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
-    var createdDate: LocalDateTime? = LocalDateTime.of(2017, 12, 12,0,0)
+    var createdDate: LocalDateTime = LocalDateTime.of(2017, 12, 12,0,0)
 
     @Column(nullable = false, updatable = false)
     @LastModifiedDate
-    var lastFetchedDate: LocalDateTime? = LocalDateTime.of(2017, 12, 12,0,0)
+    var lastFetchedDate: LocalDateTime = LocalDateTime.of(2017, 12, 12,0,0)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portal_id")

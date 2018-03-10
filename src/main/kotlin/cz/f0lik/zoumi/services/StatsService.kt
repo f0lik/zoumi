@@ -14,11 +14,11 @@ class StatsService {
     lateinit var commentRepository: CommentRepository
 
     fun getAllCommentsCount(): Long {
-        return commentRepository.getCommentCount()
+        return commentRepository.count()
     }
 
-    fun getSimilarCommentCount(): Int {
-        return similarCommentRepository.getSuspiciousCommentCount()
+    fun getSimilarCommentCount(): Long {
+        return similarCommentRepository.count()
     }
 
     fun getSimilarCommentCountInBetween(lowerPercentage: Int, highestPercentage: Int): Int {

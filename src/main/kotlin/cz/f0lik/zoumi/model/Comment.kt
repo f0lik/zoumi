@@ -15,17 +15,17 @@ class Comment {
     var id: Long? = null
 
     @Column(name = "author")
-    var author: String? = null
+    var author: String = ""
 
     @Column(name = "commentText", columnDefinition = "text")
-    var commentText: String? = null
+    var commentText: String = ""
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
-    var created: LocalDateTime? = LocalDateTime.of(2017, 12, 12,0,0)
+    var created: LocalDateTime = LocalDateTime.of(2017, 12, 12,0,0)
 
     @Column
-    var isNew: Boolean? = true
+    var isNew: Boolean = true
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id", nullable = false)

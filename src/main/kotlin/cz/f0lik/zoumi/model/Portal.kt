@@ -16,11 +16,11 @@ class Portal {
 
     @NotBlank
     @Column(columnDefinition = "text")
-    var name: String? = null
+    var name: String = ""
 
     @NotBlank
     @Column(columnDefinition = "text")
-    var url: String? = null
+    var url: String = ""
 
     @OneToMany(cascade = arrayOf(CascadeType.ALL), fetch = FetchType.EAGER, mappedBy = "portal")
     @JsonManagedReference

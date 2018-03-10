@@ -14,9 +14,6 @@ interface SimilarCommentRepository : JpaRepository<SimilarComment, Long> {
     @Query("SELECT COUNT(*) FROM SimilarComment t where t.firstCommentArticleId = ?1 OR t.secondCommentArticleId = ?1")
     fun getSuspiciousCommentCount(articleId: Long): Int
 
-    @Query("SELECT COUNT(*) FROM SimilarComment")
-    fun getSuspiciousCommentCount(): Int
-
     @Query("SELECT COUNT(*) FROM SimilarComment t where t.similarity BETWEEN ?1 AND ?2 ")
     fun getSuspiciousCommentCountBetween(lowerPercentage: Int, highestPercentage: Int): Int
 

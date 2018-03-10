@@ -43,7 +43,7 @@ class TextAnalysisService {
         newerComments.forEach { comment -> comment.isNew = false }
         commentRepository.save(newerComments)
 
-        val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1)
+        val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
 
         similarComments = similarCommentRepository.findAll()
 

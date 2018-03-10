@@ -5,6 +5,7 @@ import cz.f0lik.zoumi.model.Comment
 import cz.f0lik.zoumi.repository.ArticleRepository
 import cz.f0lik.zoumi.repository.CommentRepository
 import cz.f0lik.zoumi.utils.DbConnector
+import org.hibernate.SessionFactory
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
@@ -12,6 +13,7 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
+import javax.persistence.EntityManagerFactory
 
 @Service("dataDownloaderService")
 class DataDownloaderService {
@@ -20,6 +22,9 @@ class DataDownloaderService {
 
     @Autowired
     lateinit var commentRepository: CommentRepository
+
+    @Autowired
+    lateinit var entityManagerFactory: EntityManagerFactory
 
     fun fetchData() {
         val dbConnector = DbConnector().getConnection() ?: throw IllegalAccessException("Connector is not initialized")
@@ -30,9 +35,9 @@ class DataDownloaderService {
             throw IllegalStateException("Missing data")
         }
         val remoteArticleCount = resultSet.getInt("article_count")
-        val localArticleCount = articleRepository.getArticleCount()
+        val localArticleCount = articleRepository.count()
 
-        if (remoteArticleCount == localArticleCount) {
+        if (remoteArticleCount <= localArticleCount) {
             return
         }
 
@@ -45,7 +50,7 @@ class DataDownloaderService {
             localMaxCreatedDate = articlesCreatedTime.get()[0]
         }
 
-        val queryAllNewerArticles = "SELECT id_article, created, description, last_collection, name, url" +
+        val queryAllNewerArticles = "SELECT id_article, created, description, last_collection, name, url, keywords" +
                 " FROM article WHERE created > '$localMaxCreatedDate'"
 
         val resultSet1 = dbConnector.createStatement().executeQuery(queryAllNewerArticles)
@@ -58,6 +63,7 @@ class DataDownloaderService {
             article.anotation = resultSet1.getString("description")
             article.lastFetchedDate = resultSet1.getTimestamp("last_collection").toLocalDateTime()
             article.title = resultSet1.getString("name")
+            article.keyWords = resultSet1.getString("keywords").toLowerCase()
             article.url = resultSet1.getString("url")
             articleRepository.save(article)
             val callableSimilarityTask = Callable {
@@ -79,17 +85,17 @@ class DataDownloaderService {
                 .availableProcessors() - 1)
         val callableSimilarityTasks = ArrayList<Callable<Unit>>()
 
-        idToDateMap.forEach { (key, value) ->
+        idToDateMap.forEach { (articleId, lastFetchedDate) ->
             val statement = dbConnector.createStatement()
-            val query = "SELECT last_collection as lct from article where id_article=$key"
+            val query = "SELECT last_collection as lct from article where id_article=$articleId"
             val resultSet = statement.executeQuery(query)
             if (!resultSet.next()) {
                 throw IllegalStateException("Missing data")
             }
             val lastDateSource = resultSet.getTimestamp("lct").toLocalDateTime()
-            if (lastDateSource > value) {
+            if (lastDateSource > lastFetchedDate) {
                 val callableSimilarityTask = Callable {
-                    updateArticleComments(key)
+                    updateArticleComments(articleId)
                 }
                 callableSimilarityTasks.add(callableSimilarityTask)
             }
@@ -115,6 +121,10 @@ class DataDownloaderService {
         val threadDbConnection = DbConnector().getConnection()
         val statement = threadDbConnection!!.createStatement()
         val resultSet = statement.executeQuery(queryAllNewerComments)
+
+        val session = entityManagerFactory.unwrap(SessionFactory::class.java).openSession()
+        val transaction = session.beginTransaction()
+        var i = 0
         while (resultSet.next()) {
             val comment = Comment()
             comment.id = resultSet.getInt("id_comment").toLong()
@@ -123,8 +133,16 @@ class DataDownloaderService {
             comment.created = resultSet.getTimestamp("created").toLocalDateTime()
             comment.article = articleRepository.findOne(articleId)
             comment.isNew = true
-            commentRepository.save(comment)
+            session.save(comment)
+            if ( i % 30 == 0 ) {
+                session.flush()
+                session.clear()
+                i=0
+            }
+            i++
         }
+        transaction.commit()
+        session.close()
         threadDbConnection.close()
     }
 }

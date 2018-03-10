@@ -67,7 +67,8 @@ class AppController {
         val evaluatedSortDirection = sortDirection.orElse(Sort.Direction.DESC.toString())
 
         val articles = when {
-            search.isPresent -> articleService.listAllByPage(search.get(), PageRequest(evaluatedPage, evaluatedPageSize,
+            search.isPresent -> articleService.listAllByPage(search.get().toLowerCase(),
+                    PageRequest(evaluatedPage, evaluatedPageSize,
                     Sort.Direction.fromString(evaluatedSortDirection), evaluatedSortAttribute))
             else -> articleService.listAllByPage(PageRequest(evaluatedPage, evaluatedPageSize,
                     Sort.Direction.fromString(evaluatedSortDirection), evaluatedSortAttribute))

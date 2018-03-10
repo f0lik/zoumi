@@ -15,8 +15,5 @@ interface ArticleRepository : JpaRepository<Article, Long>, QueryByExampleExecut
     @Query("SELECT u.createdDate from Article u")
     fun getArticlesCreatedTime(): Optional<List<LocalDateTime>>
 
-    @Query("SELECT COUNT(*) FROM Article")
-    fun getArticleCount(): Int
-
     fun findByKeyWordsContaining(keyWord: String, pageable: Pageable): Page<Article>
 }
