@@ -15,6 +15,6 @@ class ZMain extends GebSpec {
 
         then: "Again home page"
         at ZMainPage
-        heading == "Lžou mi? Ovlivňují ostaní?"
+        heading == "Lžou mi? Ovlivňují ostatní?"
     }
 }
