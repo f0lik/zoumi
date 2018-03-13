@@ -12,4 +12,7 @@ interface CommentRepository : JpaRepository<Comment, Long> {
 
     @Query("SELECT COUNT(*) from Comment where article.id = ?1")
     fun getCommentCount(articleId: Long): Int
+
+    @Query("SELECT c from Comment c where c.article.id = ?1 AND c.isNew=true")
+    fun getNewComments(articleId: Long): Optional<List<Comment>>
 }

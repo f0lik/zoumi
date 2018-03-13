@@ -1,5 +1,6 @@
 package cz.f0lik.zoumi.services
 
+import cz.f0lik.zoumi.model.Article
 import cz.f0lik.zoumi.model.Comment
 import cz.f0lik.zoumi.model.SimilarComment
 import cz.f0lik.zoumi.repository.ArticleRepository
@@ -29,27 +30,21 @@ class TextAnalysisService {
     var similarComments: List<SimilarComment>? = null
     val jaccardSimilarityAlg = Jaccard()
 
-    fun compareArticles(firstArticleId: Long, secondArticleId: Long): Boolean {
-        val firstArticle = articleRepository.findOne(firstArticleId)
-        val secondArticle = articleRepository.findOne(secondArticleId)
+    fun compareArticles(firstArticle: Article, secondArticle: Article): Boolean {
         var somethingSimilar = false
+        val newerComments = commentRepository.getNewComments(firstArticle.id!!)
 
-        val newerComments = firstArticle.comments!!.filter { comment ->
-            comment.isNew == true
-        }
+        if (newerComments.isPresent.not()) return somethingSimilar
 
-        if (newerComments.isEmpty()) return somethingSimilar
+        newerComments.get().forEach { comment -> comment.isNew = false }
+        commentRepository.save(newerComments.get())
 
-        newerComments.forEach { comment -> comment.isNew = false }
-        commentRepository.save(newerComments)
-
-        val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
+        val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1)
 
         similarComments = similarCommentRepository.findAll()
-
         val processedPairIds = HashSet<String>()
 
-        newerComments.forEach { firstComment ->
+        newerComments.get().forEach { firstComment ->
             run {
                 val callableSimilarityTasks = ArrayList<Callable<Boolean>>()
                 secondArticle.comments!!.forEach inner@{ secondComment ->
@@ -78,6 +73,7 @@ class TextAnalysisService {
                 somethingSimilar = similarTasks.isNotEmpty()
             }
         }
+        processedPairIds.clear()
         newFixedThreadPool.shutdown()
         return somethingSimilar
     }
@@ -132,7 +128,7 @@ class TextAnalysisService {
 
     fun checkAllArticles() {
         articleRepository.findAll().forEach { article ->
-            compareArticles(article.id!!, article.id!!)
+            compareArticles(article, article)
         }
     }
 

@@ -38,6 +38,7 @@ class Article {
     var keyWords: String = ""
 
     @NotBlank
+    @Column(columnDefinition = "text")
     var url: String = ""
 
     @OneToMany(cascade = arrayOf(CascadeType.ALL), fetch = FetchType.EAGER, mappedBy = "article")

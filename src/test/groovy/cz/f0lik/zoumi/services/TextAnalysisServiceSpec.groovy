@@ -26,18 +26,18 @@ class TextAnalysisServiceSpec extends Specification {
         def firstComment = new Comment(id: 1, commentText: "Ahoj, jsem uplne stejny", isNew: false, article: article1)
         article1.comments = SetUtils.singletonSet(firstComment)
 
-
         def article2 = new Article()
         article2.id = 2
         def secondComment = new Comment(id: 2, commentText: "Hoj, jsem uplne stejny", isNew: false, article: article2)
         article2.comments = SetUtils.singletonSet(secondComment)
         articleRepository.findOne(1) >> article1
         articleRepository.findOne(2) >> article2
+        commentRepository.getNewComments(article1.id) >> Optional.empty()
 
         similarCommentRepository.findAll() >> []
         similarCommentRepository.findByFirstSecondCommentId(1, 2) >> Optional.empty()
 
-        def result = textAnalysisService.compareArticles(article1.id, article2.id)
+        def result = textAnalysisService.compareArticles(article1, article2)
 
         then:
         !result
@@ -58,7 +58,9 @@ class TextAnalysisServiceSpec extends Specification {
         articleRepository.findOne(2) >> article2
         similarCommentRepository.findAll() >> []
         similarCommentRepository.findByFirstSecondCommentId(1, 2) >> Optional.empty()
-        def result = textAnalysisService.compareArticles(article1.id, article2.id)
+        commentRepository.getNewComments(article1.id) >> Optional.of(article1.comments)
+
+        def result = textAnalysisService.compareArticles(article1, article2)
 
         then:
         result
@@ -80,7 +82,9 @@ class TextAnalysisServiceSpec extends Specification {
         articleRepository.findOne(2) >> article2
         similarCommentRepository.findAll() >> []
         similarCommentRepository.findByFirstSecondCommentId(1, 2) >> Optional.empty()
-        def result = textAnalysisService.compareArticles(article1.id, article2.id)
+        commentRepository.getNewComments(article1.id) >> Optional.of(article1.comments)
+
+        def result = textAnalysisService.compareArticles(article1, article2)
 
         then:
         !result
