@@ -17,12 +17,16 @@ class ArticleController {
 
     @GetMapping("/articles/recountArticles")
     fun recountArticles(){
+        println("Starting check at " + LocalDateTime.now())
         textAnalysisService.checkAllArticles()
+        println("Ending check at " + LocalDateTime.now())
     }
 
     @GetMapping("/articles/recountComments")
     fun recountComments(){
+        println("Comment recount started at " + LocalDateTime.now())
         textAnalysisService.updateCommentCount()
+        println("Comment recount ended at " + LocalDateTime.now())
     }
 
     @GetMapping("/articles/fetchAll")

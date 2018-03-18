@@ -30,6 +30,11 @@ class TextAnalysisService {
     var similarComments: List<SimilarComment>? = null
     val jaccardSimilarityAlg = Jaccard()
 
+    fun compareArticles(articleId: Long) {
+        val article = articleRepository.findOne(articleId)
+        compareArticles(article, article)
+    }
+
     fun compareArticles(firstArticle: Article, secondArticle: Article): Boolean {
         var somethingSimilar = false
         val newerComments = commentRepository.getNewComments(firstArticle.id!!)
@@ -127,8 +132,11 @@ class TextAnalysisService {
     }
 
     fun checkAllArticles() {
-        articleRepository.findAll().forEach { article ->
-            compareArticles(article, article)
+        val updatedArticleIds = commentRepository.getArticleIdsOfNewComments()
+        if (updatedArticleIds.isPresent) {
+            updatedArticleIds.get().forEach { articleId ->
+                compareArticles(articleId)
+            }
         }
     }
 

@@ -15,4 +15,7 @@ interface CommentRepository : JpaRepository<Comment, Long> {
 
     @Query("SELECT c from Comment c where c.article.id = ?1 AND c.isNew=true")
     fun getNewComments(articleId: Long): Optional<List<Comment>>
+
+    @Query("SELECT distinct c.article.id from Comment c where c.isNew=true")
+    fun getArticleIdsOfNewComments(): Optional<List<Long>>
 }

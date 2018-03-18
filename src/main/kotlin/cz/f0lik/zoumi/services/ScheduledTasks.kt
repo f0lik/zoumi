@@ -11,9 +11,19 @@ class ScheduledTasks {
     @Autowired
     lateinit var textAnalysisService: TextAnalysisService
 
+    @Autowired
+    lateinit var dataDownloaderService: DataDownloaderService
+
     private val dateFormat = SimpleDateFormat("HH:mm:ss")
 
     @Scheduled(cron = "0 0 1 * * ?")
+    fun fetchArticlesComments() {
+        println("Starting fetch at " + dateFormat.format(Date()))
+        dataDownloaderService.fetchData()
+        println("Ending fetch at " + dateFormat.format(Date()))
+    }
+
+    @Scheduled(cron = "0 0 3 * * ?")
     fun checkArticleRoutine() {
         println("Starting check at " + dateFormat.format(Date()))
         textAnalysisService.checkAllArticles()
