@@ -121,12 +121,10 @@ class TextAnalysisService {
             return similarityCommentMap
         }
 
-       suspiciousComments.get().forEach { similarComment ->
-            run {
-                val first = commentRepository.findOne(similarComment.firstCommentId)
-                val second = commentRepository.findOne(similarComment.secondCommentId)
-                similarityCommentMap.put(Pair(first, second), similarComment.similarity!!)
-            }
+        suspiciousComments.get().forEach { similarComment ->
+            val first = commentRepository.findOne(similarComment.firstCommentId)
+            val second = commentRepository.findOne(similarComment.secondCommentId)
+            similarityCommentMap.put(Pair(first, second), similarComment.similarity!!)
         }
         return similarityCommentMap
     }
@@ -141,10 +139,19 @@ class TextAnalysisService {
     }
 
     fun updateCommentCount() {
-        articleRepository.findAll().forEach { article ->
-            article.commentCount = commentRepository.getCommentCount(article.id!!)
-            article.similarCommentCount = similarCommentRepository.getSuspiciousCommentCount(article.id!!)
-            articleRepository.save(article)
+        val notRecountedArticleIDs = commentRepository.getArticleIdsOfNotCountedComments()
+        if (notRecountedArticleIDs.isPresent) {
+            notRecountedArticleIDs.get().forEach { articleId ->
+                val updatedArticle = articleRepository.findOne(articleId)
+                updatedArticle.commentCount = commentRepository.getCommentCount(articleId)
+                updatedArticle.similarCommentCount = similarCommentRepository.getSuspiciousCommentCount(articleId)
+                val commentsToRecount = commentRepository.getCommentsToRecount(articleId)
+                if (commentsToRecount.isPresent) {
+                    commentsToRecount.get().forEach { comment -> comment.isCounted = true }
+                    commentRepository.save(commentsToRecount.get())
+                }
+                articleRepository.save(updatedArticle)
+            }
         }
     }
 }

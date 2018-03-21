@@ -133,6 +133,7 @@ class DataDownloaderService {
             comment.created = resultSet.getTimestamp("created").toLocalDateTime()
             comment.article = articleRepository.findOne(articleId)
             comment.isNew = true
+            comment.isCounted = false
             session.save(comment)
             if ( i % 30 == 0 ) {
                 session.flush()

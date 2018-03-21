@@ -27,6 +27,9 @@ class Comment {
     @Column
     var isNew: Boolean = true
 
+    @Column
+    var isCounted: Boolean = false
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id", nullable = false)
     @JsonBackReference
