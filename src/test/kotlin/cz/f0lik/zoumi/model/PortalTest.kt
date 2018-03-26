@@ -13,7 +13,6 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(SpringRunner::class)
 @DataJpaTest
 class PortalTest {
-
     @Autowired
     lateinit var entityManager: TestEntityManager
 
@@ -32,16 +31,16 @@ class PortalTest {
 
     @Test
     fun shouldStorePortal() {
-        val foundPortal = portalRepository.save(portalBuilder(PORTAL_NAME, PORTAL_URL))
+        val foundPortal = portalRepository.save(portalBuilder(1, PORTAL_NAME, PORTAL_URL))
         Assert.assertEquals(PORTAL_NAME, foundPortal.name)
         Assert.assertEquals(PORTAL_URL, foundPortal.url)
     }
 
     @Test
     fun shouldFindPortalById() {
-        val firstPortal = portalBuilder(PORTAL_NAME, PORTAL_URL)
+        val firstPortal = portalBuilder(1, PORTAL_NAME, PORTAL_URL)
         entityManager.persist(firstPortal)
-        val secondPortal = portalBuilder("Novinky", "http://www.novinky.cz")
+        val secondPortal = portalBuilder(2, "Novinky", "http://www.novinky.cz")
         entityManager.persist(secondPortal)
         val foundArticle = portalRepository.findOne(secondPortal.id)
 
@@ -50,7 +49,7 @@ class PortalTest {
 
     @Test
     fun shouldContainComments() {
-        val firstPortal = portalBuilder(PORTAL_NAME, PORTAL_URL)
+        val firstPortal = portalBuilder(1, PORTAL_NAME, PORTAL_URL)
         entityManager.persist(firstPortal)
 
         val newArticle = Article()
@@ -65,8 +64,9 @@ class PortalTest {
         Assert.assertEquals(1, firstPortal.articles!!.size)
     }
 
-    private fun portalBuilder(name: String, url: String) : Portal {
+    private fun portalBuilder(id: Long, name: String, url: String) : Portal {
         val portal = Portal()
+        portal.id = id
         portal.name = name
         portal.url = url
         portal.articles = HashSet()
