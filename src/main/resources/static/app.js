@@ -3,7 +3,14 @@ $(document).ready(function() {
     changePageAndSizeAndSort();
     changeSortDirection();
     clickSeach();
+    portalSelectionChanged();
 });
+
+function portalSelectionChanged() {
+    $('#portalSelect').change(function(evt) {
+        window.location.replace("/articles/?portal=" + this.value);
+    });
+}
 
 function changePageAndSize() {
     $('#pageSizeSelect').change(function(evt) {

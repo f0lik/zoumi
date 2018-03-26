@@ -116,6 +116,10 @@
                     <option th:each="pageSize : ${pageSizes}" th:text="${pageSize}" th:value="${pageSize}"
                             th:selected="${pageSize} == ${selectedPageSize}"></option>
                   </select>
+                  Zobrazit portál: <select name="portalSelect" class="form-control pagination" id="portalSelect" title="Portál k zobrazení">
+                  <option th:each="portal : ${portalMap}" th:text="${portal.value}" th:value="${portal.key}"
+                          th:selected="${portal.key} == ${selectedPortal}"></option>
+                </select>
                 </div>
               </div>
             </div>

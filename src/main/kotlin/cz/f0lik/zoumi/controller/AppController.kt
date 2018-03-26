@@ -2,10 +2,7 @@ package cz.f0lik.zoumi.controller
 
 import cz.f0lik.zoumi.model.Article
 import cz.f0lik.zoumi.repository.ArticleRepository
-import cz.f0lik.zoumi.services.ArticleService
-import cz.f0lik.zoumi.services.Pager
-import cz.f0lik.zoumi.services.StatsService
-import cz.f0lik.zoumi.services.TextAnalysisService
+import cz.f0lik.zoumi.services.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -30,6 +27,9 @@ class AppController {
 
     @Autowired
     lateinit var articleService: ArticleService
+
+    @Autowired
+    lateinit var portalService: PortalService
 
     private val INITIAL_PAGE = 0
     private val INITIAL_PAGE_SIZE = 5
@@ -56,7 +56,8 @@ class AppController {
                     @RequestParam("page")page: Optional<Int>,
                     @RequestParam("sortAttribute") sortAttribute: Optional<String>,
                     @RequestParam("sortDirection") sortDirection: Optional<String>,
-                    @RequestParam("search") search: Optional<String>): ModelAndView {
+                    @RequestParam("search") search: Optional<String>,
+                    @RequestParam("portal")  choosedPortal: Optional<Int>): ModelAndView {
         val modelAndView = ModelAndView("article_list")
         val evaluatedPageSize = when {
             pageSize.orElse(INITIAL_PAGE_SIZE) > 20 -> INITIAL_PAGE_SIZE
@@ -65,9 +66,13 @@ class AppController {
         val evaluatedPage = if (page.orElse(0) < 1) INITIAL_PAGE else page.get() - 1
         val evaluatedSortAttribute = sortAttribute.orElse("similarCommentCount")
         val evaluatedSortDirection = sortDirection.orElse(Sort.Direction.DESC.toString())
+        val evaluatedPortal = choosedPortal.orElse(-1)
 
         val articles = when {
             search.isPresent -> articleService.listAllByPage(search.get().toLowerCase(),
+                    PageRequest(evaluatedPage, evaluatedPageSize,
+                    Sort.Direction.fromString(evaluatedSortDirection), evaluatedSortAttribute))
+            choosedPortal.isPresent -> articleService.listAllByPortal(choosedPortal.get().toLong(),
                     PageRequest(evaluatedPage, evaluatedPageSize,
                     Sort.Direction.fromString(evaluatedSortDirection), evaluatedSortAttribute))
             else -> articleService.listAllByPage(PageRequest(evaluatedPage, evaluatedPageSize,
@@ -75,7 +80,11 @@ class AppController {
         }
         val pager = Pager(articles.totalPages, articles.number, 5)
 
+        val portalIdNameMap = portalService.getPortalIdNameMap()
+        portalIdNameMap!![-1] = "--Všechny--"
         modelAndView.addObject("articles", articles)
+        modelAndView.addObject("portalMap", portalIdNameMap)
+        modelAndView.addObject("selectedPortal", evaluatedPortal)
         modelAndView.addObject("selectedPageSize", evaluatedPageSize)
         modelAndView.addObject("pageSizes", PAGE_SIZES)
         modelAndView.addObject("sortAttributes", sortAttributesMap)

@@ -1,6 +1,7 @@
 package cz.f0lik.zoumi.repository
 
 import cz.f0lik.zoumi.model.Article
+import cz.f0lik.zoumi.model.Portal
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -16,4 +17,6 @@ interface ArticleRepository : JpaRepository<Article, Long>, QueryByExampleExecut
     fun getArticlesCreatedTime(): Optional<List<LocalDateTime>>
 
     fun findByKeyWordsContaining(keyWord: String, pageable: Pageable): Page<Article>
+
+    fun findByPortal(portal: Portal, pageable: Pageable): Page<Article>
 }
