@@ -2,8 +2,10 @@ package cz.f0lik.zoumi.services
 
 import cz.f0lik.zoumi.model.Article
 import cz.f0lik.zoumi.model.Comment
+import cz.f0lik.zoumi.model.Portal
 import cz.f0lik.zoumi.repository.ArticleRepository
 import cz.f0lik.zoumi.repository.CommentRepository
+import cz.f0lik.zoumi.repository.PortalRepository
 import cz.f0lik.zoumi.utils.DbConnector
 import org.hibernate.SessionFactory
 import org.springframework.stereotype.Service
@@ -13,12 +15,17 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
+import java.util.stream.Collectors
 import javax.persistence.EntityManagerFactory
+import kotlin.collections.ArrayList
 
 @Service("dataDownloaderService")
 class DataDownloaderService {
     @Autowired
     lateinit var articleRepository: ArticleRepository
+
+    @Autowired
+    lateinit var portalRepository: PortalRepository
 
     @Autowired
     lateinit var commentRepository: CommentRepository
@@ -27,6 +34,7 @@ class DataDownloaderService {
     lateinit var entityManagerFactory: EntityManagerFactory
 
     fun fetchData() {
+        updatePortals()
         val dbConnector = DbConnector().getConnection() ?: throw IllegalAccessException("Connector is not initialized")
 
         val queryArticleCount = "SELECT COUNT(*) AS article_count FROM ARTICLE"
@@ -50,21 +58,23 @@ class DataDownloaderService {
             localMaxCreatedDate = articlesCreatedTime.get()[0]
         }
 
-        val queryAllNewerArticles = "SELECT id_article, created, description, last_collection, name, url, keywords" +
-                " FROM article WHERE created > '$localMaxCreatedDate'"
+        val queryAllNewerArticles = "SELECT id_article, created, description, id_portal_pkey, last_collection," +
+                " name, url, keywords FROM article WHERE created > '$localMaxCreatedDate'"
 
-        val resultSet1 = dbConnector.createStatement().executeQuery(queryAllNewerArticles)
+        val newArticles = dbConnector.createStatement().executeQuery(queryAllNewerArticles)
         val callableUpdateArticleTasks = ArrayList<Callable<Unit>>()
 
-        while (resultSet1.next()) {
+        while (newArticles.next()) {
             val article = Article()
-            article.id = resultSet1.getInt("id_article").toLong()
-            article.createdDate = resultSet1.getTimestamp("created").toLocalDateTime()
-            article.anotation = resultSet1.getString("description")
-            article.lastFetchedDate = resultSet1.getTimestamp("last_collection").toLocalDateTime()
-            article.title = resultSet1.getString("name")
-            article.keyWords = resultSet1.getString("keywords").toLowerCase()
-            article.url = resultSet1.getString("url")
+            article.id = newArticles.getInt("id_article").toLong()
+            article.createdDate = newArticles.getTimestamp("created").toLocalDateTime()
+            article.anotation = newArticles.getString("description")
+            article.lastFetchedDate = newArticles.getTimestamp("last_collection").toLocalDateTime()
+            article.title = newArticles.getString("name")
+            article.keyWords = newArticles.getString("keywords").toLowerCase()
+            article.url = newArticles.getString("url")
+            val articlePortal = portalRepository.findOne(newArticles.getLong("id_portal_pkey"))
+            article.portal = articlePortal
             articleRepository.save(article)
             val callableSimilarityTask = Callable {
                 updateArticleComments(article.id)
@@ -74,6 +84,48 @@ class DataDownloaderService {
         newFixedThreadPool.invokeAll(callableUpdateArticleTasks)
         newFixedThreadPool.shutdown()
         dbConnector.close()
+    }
+
+    fun updatePortals() {
+        val dbConnector = DbConnector().getConnection() ?: throw IllegalAccessException("Connector is not initialized")
+        val queryPortalCount = "SELECT COUNT(*) AS portal_count FROM PORTAL"
+        val remotePortalCountResult = dbConnector.createStatement().executeQuery(queryPortalCount)
+        if (!remotePortalCountResult.next()) {
+            throw IllegalStateException("Missing data")
+        }
+        val remotePortalCount = remotePortalCountResult.getInt("portal_count")
+        val localPortalCount = portalRepository.count()
+
+        if (remotePortalCount <= localPortalCount) {
+            return
+        }
+
+        val queryPortalIDs = "SELECT id_portal FROM PORTAL"
+        val portalIds = dbConnector.createStatement().executeQuery(queryPortalIDs)
+        val remoteIds = ArrayList<Long>()
+        while (portalIds.next()) {
+            remoteIds.add(portalIds.getLong("id_portal"))
+        }
+
+        val localPortals = portalRepository.findAll().orEmpty()
+        val localPortalIds = localPortals.stream().map(Portal::id).collect(Collectors.toList())
+
+        remoteIds.removeAll(localPortalIds)
+
+        if(remoteIds.size == 0) {
+            return
+        }
+        val queryNotLocallyKnownPortals = "SELECT id_portal, last_collection, name, url_portal FROM PORTAL"
+        val resultNewPortals = dbConnector.createStatement().executeQuery(queryNotLocallyKnownPortals)
+
+        while (resultNewPortals.next()) {
+            val portal = Portal()
+            portal.id = resultNewPortals.getLong("id_portal")
+            portal.lastChecked = resultNewPortals.getTimestamp("last_collection").toLocalDateTime()
+            portal.name = resultNewPortals.getString("name")
+            portal.url = resultNewPortals.getString("url_portal")
+            portalRepository.save(portal)
+        }
     }
 
     fun updateCurrentArticles() {
@@ -126,10 +178,14 @@ class DataDownloaderService {
         val transaction = session.beginTransaction()
         var i = 0
         while (resultSet.next()) {
+            val commentText = resultSet.getString("text")
+            if (commentText.isEmpty()) {
+                continue
+            }
             val comment = Comment()
             comment.id = resultSet.getInt("id_comment").toLong()
             comment.author = resultSet.getString("author")
-            comment.commentText = resultSet.getString("text")
+            comment.commentText = commentText
             comment.created = resultSet.getTimestamp("created").toLocalDateTime()
             comment.article = articleRepository.findOne(articleId)
             comment.isNew = true
