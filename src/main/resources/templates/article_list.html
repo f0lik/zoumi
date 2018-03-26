@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Analýza diskuzí českých online portálů">
     <meta name="author" content="">
-    <title>Články - Zoumi.cz</title>
+    <title>Články | Zoumi.cz</title>
 
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.css"/>
     <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
@@ -103,16 +103,16 @@
               <div class="row">
                 <div class="form-group">
                   Řadit podle:
-                  <select class="form-control" id="sortAttributeSelect">
+                  <select name="sortAttributeSelect" class="form-control" id="sortAttributeSelect">
                     <option th:each="sortAttribute : ${sortAttributes}" th:text="${sortAttribute.key}" th:value="${sortAttribute.value}"
                             th:selected="${sortAttribute.value} == ${selectedSortAttribute}"></option>
                   </select>
                   Směř řazení:
-                  <select class="form-control" id="sortDirection">
+                  <select name="sortDirection" class="form-control" id="sortDirection">
                     <option th:each="sortDirection : ${sortDirections}" th:text="${sortDirection.key}" th:value="${sortDirection.value}"
                             th:selected="${sortDirection.value} == ${selectedSortDirection}"></option>
                   </select>
-                  Záznamů na stránku: <select class="form-control pagination" id="pageSizeSelect" title="Počet záznamů na stránku">
+                  Záznamů na stránku: <select name="pageSizeSelect" class="form-control pagination" id="pageSizeSelect" title="Počet záznamů na stránku">
                     <option th:each="pageSize : ${pageSizes}" th:text="${pageSize}" th:value="${pageSize}"
                             th:selected="${pageSize} == ${selectedPageSize}"></option>
                   </select>
