@@ -16,7 +16,9 @@ import kotlin.collections.HashMap
 
 @Service("textAnalysisService")
 class TextAnalysisService {
-    val SIMILARITY_LIMIT = 0.6
+    companion object {
+        val SIMILARITY_LIMIT = 0.6
+    }
 
     @Autowired
     lateinit var articleRepository: ArticleRepository
@@ -35,11 +37,10 @@ class TextAnalysisService {
         compareArticles(article, article)
     }
 
-    fun compareArticles(firstArticle: Article, secondArticle: Article): Boolean {
-        var somethingSimilar = false
+    fun compareArticles(firstArticle: Article, secondArticle: Article) {
         val newerComments = commentRepository.getNewComments(firstArticle.id!!)
 
-        if (newerComments.isPresent.not()) return somethingSimilar
+        if (newerComments.isPresent.not()) return
 
         newerComments.get().forEach { comment -> comment.isNew = false }
         commentRepository.save(newerComments.get())
@@ -51,7 +52,7 @@ class TextAnalysisService {
 
         newerComments.get().forEach { firstComment ->
             run {
-                val callableSimilarityTasks = ArrayList<Callable<Boolean>>()
+                val callableSimilarityTasks = ArrayList<Callable<Double>>()
                 secondArticle.comments!!.forEach inner@{ secondComment ->
                     run {
                         val pairKey = Math.min(firstComment.id!!, secondComment.id!!).toString() + "_" + Math.max(firstComment.id!!, secondComment.id!!)
@@ -61,35 +62,33 @@ class TextAnalysisService {
                         if (firstComment.id == secondComment.id) {
                             return@inner
                         }
-                        if (firstComment.commentText.equals(secondComment.commentText)) {
+                        if (firstComment.commentText == secondComment.commentText) {
                             return@inner
                         }
                         if (doSimilarCommentAlreadyExist(firstComment.id!!, secondComment.id!!)) {
                             return@inner
                         }
                         processedPairIds.add(pairKey)
-                        val callableSimilarityTask = Callable {
-                            checkSimilarity(firstComment, secondComment)
+                        val callableSimilarityTask = Callable<Double> {
+                            checkCommentSimilarity(firstComment, secondComment)
                         }
                         callableSimilarityTasks.add(callableSimilarityTask)
                     }
                 }
-                val similarTasks = newFixedThreadPool.invokeAll(callableSimilarityTasks).filter { task -> task.get() == true }
-                somethingSimilar = similarTasks.isNotEmpty()
+                newFixedThreadPool.invokeAll(callableSimilarityTasks)
             }
         }
         processedPairIds.clear()
         newFixedThreadPool.shutdown()
-        return somethingSimilar
     }
 
-    private fun checkSimilarity(firstComment: Comment, secondComment: Comment): Boolean {
+    private fun checkCommentSimilarity(firstComment: Comment, secondComment: Comment): Double {
         val similarity = jaccardSimilarityAlg.similarity(firstComment.commentText, secondComment.commentText)
         if (similarity > SIMILARITY_LIMIT) {
             createSimilarComment(firstComment, secondComment, similarity)
-            return true
+            return similarity
         }
-        return false
+        return 0.0
     }
 
     private fun createSimilarComment(firstComment: Comment, secondComment: Comment, similarity: Double) {
@@ -108,10 +107,6 @@ class TextAnalysisService {
                     || (similarComment.firstCommentId == id2 || similarComment.secondCommentId == id1)
         }
         return similarComment != null
-    }
-
-    fun getSuspiciousCommentsCount(articleId: Long): Int {
-        return similarCommentRepository.getSuspiciousCommentCount(articleId)
     }
 
     fun getSuspiciousComments(articleId: Long): HashMap<Pair<Comment, Comment>, Int> {

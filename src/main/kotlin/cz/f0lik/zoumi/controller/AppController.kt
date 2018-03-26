@@ -102,7 +102,7 @@ class AppController {
         val modelAndView = ModelAndView()
         modelAndView.viewName = "article"
         modelAndView.addObject("article", article)
-        modelAndView.addObject("suspiciousCount", textService.getSuspiciousCommentsCount(articleId))
+        modelAndView.addObject("suspiciousCount", statsService.getSuspiciousCommentsCount(articleId))
         if (showComments) {
             modelAndView.addObject("suspComments", textService.getSuspiciousComments(articleId))
         }

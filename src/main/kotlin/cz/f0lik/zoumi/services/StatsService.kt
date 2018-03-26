@@ -24,4 +24,8 @@ class StatsService {
     fun getSimilarCommentCountInBetween(lowerPercentage: Int, highestPercentage: Int): Int {
         return similarCommentRepository.getSuspiciousCommentCountBetween(lowerPercentage, highestPercentage)
     }
+
+    fun getSuspiciousCommentsCount(articleId: Long): Int {
+        return similarCommentRepository.getSuspiciousCommentCount(articleId)
+    }
 }
