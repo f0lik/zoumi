@@ -10,6 +10,7 @@ import cz.f0lik.zoumi.utils.DbConnector
 import org.hibernate.SessionFactory
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
+import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import java.util.*
@@ -35,7 +36,7 @@ class DataDownloaderService {
 
     fun fetchData() {
         updatePortals()
-        val dbConnector = DbConnector().getConnection() ?: throw IllegalAccessException("Connector is not initialized")
+        val dbConnector = DbConnector.getInstance().getConnection() ?: throw IllegalAccessException("Connector is not initialized")
 
         val queryArticleCount = "SELECT COUNT(*) AS article_count FROM ARTICLE"
         val resultSet = dbConnector.createStatement().executeQuery(queryArticleCount)
@@ -49,7 +50,6 @@ class DataDownloaderService {
             return
         }
 
-        val newFixedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1)
         val articlesCreatedTime = articleRepository.getArticlesCreatedTime()
         var localMaxCreatedDate = LocalDateTime.of(2017, 12, 12, 0, 0, 0)
 
@@ -58,15 +58,16 @@ class DataDownloaderService {
             localMaxCreatedDate = articlesCreatedTime.get()[0]
         }
 
-        val queryAllNewerArticles = "SELECT id_article, created, description, id_portal_pkey, last_collection," +
-                " name, url, keywords FROM article WHERE created > '$localMaxCreatedDate'"
+        val newerArticlesStatement = dbConnector.prepareStatement("SELECT id_article, created," +
+                " description, id_portal_pkey, last_collection, name, url, keywords FROM article WHERE created > ?")
 
-        val newArticles = dbConnector.createStatement().executeQuery(queryAllNewerArticles)
-        val callableUpdateArticleTasks = ArrayList<Callable<Unit>>()
+        newerArticlesStatement.setTimestamp(1, Timestamp.valueOf(localMaxCreatedDate))
+
+        val newArticles = newerArticlesStatement.executeQuery()
 
         while (newArticles.next()) {
             val article = Article()
-            article.id = newArticles.getInt("id_article").toLong()
+            article.id = newArticles.getLong("id_article")
             article.createdDate = newArticles.getTimestamp("created").toLocalDateTime()
             article.anotation = newArticles.getString("description")
             article.lastFetchedDate = newArticles.getTimestamp("last_collection").toLocalDateTime()
@@ -76,18 +77,13 @@ class DataDownloaderService {
             val articlePortal = portalRepository.findOne(newArticles.getLong("id_portal_pkey"))
             article.portal = articlePortal
             articleRepository.save(article)
-            val callableSimilarityTask = Callable {
-                updateArticleComments(article.id)
-            }
-            callableUpdateArticleTasks.add(callableSimilarityTask)
+            updateArticleComments(article.id)
         }
-        newFixedThreadPool.invokeAll(callableUpdateArticleTasks)
-        newFixedThreadPool.shutdown()
         dbConnector.close()
     }
 
     fun updatePortals() {
-        val dbConnector = DbConnector().getConnection() ?: throw IllegalAccessException("Connector is not initialized")
+        val dbConnector = DbConnector.getInstance().getConnection() ?: throw IllegalAccessException("Connector is not initialized")
         val queryPortalCount = "SELECT COUNT(*) AS portal_count FROM PORTAL"
         val remotePortalCountResult = dbConnector.createStatement().executeQuery(queryPortalCount)
         if (!remotePortalCountResult.next()) {
@@ -129,7 +125,7 @@ class DataDownloaderService {
     }
 
     fun updateCurrentArticles() {
-        val dbConnector = DbConnector().getConnection() ?: throw IllegalAccessException("Connector not initialized")
+        val dbConnector = DbConnector.getInstance().getConnection() ?: throw IllegalAccessException("Connector not initialized")
         val articles = articleRepository.findAll()
         val idToDateMap = articles.map { it.id to it.lastFetchedDate }
 
@@ -166,27 +162,29 @@ class DataDownloaderService {
             localMaxCreatedDate = commentsCreatedTime.get()[0]
         }
 
-        val queryAllNewerComments = "SELECT id_comment, text, created, author FROM comment" +
-                " where id_article_article=$articleId " +
-                "and created > '$localMaxCreatedDate'"
+        val threadDbConnection = DbConnector.getInstance().getConnection()
 
-        val threadDbConnection = DbConnector().getConnection()
-        val statement = threadDbConnection!!.createStatement()
-        val resultSet = statement.executeQuery(queryAllNewerComments)
+        val prepareStatement = threadDbConnection!!.prepareStatement("SELECT id_comment, text, created, author FROM comment" +
+                " where id_article_article=?" +
+                "and created > ?")
+
+        prepareStatement.setLong(1, articleId)
+        prepareStatement.setTimestamp(2, Timestamp.valueOf(localMaxCreatedDate))
+        val newComments = prepareStatement.executeQuery()
 
         val session = entityManagerFactory.unwrap(SessionFactory::class.java).openSession()
         val transaction = session.beginTransaction()
         var i = 0
-        while (resultSet.next()) {
-            val commentText = resultSet.getString("text")
+        while (newComments.next()) {
+            val commentText = newComments.getString("text")
             if (commentText.isEmpty()) {
                 continue
             }
             val comment = Comment()
-            comment.id = resultSet.getInt("id_comment").toLong()
-            comment.author = resultSet.getString("author")
+            comment.id = newComments.getLong("id_comment")
+            comment.author = newComments.getString("author")
             comment.commentText = commentText
-            comment.created = resultSet.getTimestamp("created").toLocalDateTime()
+            comment.created = newComments.getTimestamp("created").toLocalDateTime()
             comment.article = articleRepository.findOne(articleId)
             comment.isNew = true
             comment.isCounted = false
@@ -200,6 +198,5 @@ class DataDownloaderService {
         }
         transaction.commit()
         session.close()
-        threadDbConnection.close()
     }
 }
