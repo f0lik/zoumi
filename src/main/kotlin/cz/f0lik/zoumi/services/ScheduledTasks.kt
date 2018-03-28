@@ -1,39 +1,39 @@
 package cz.f0lik.zoumi.services
 
+import org.apache.logging.log4j.LogManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.LocalDateTime
 
 @Component
 class ScheduledTasks {
+    private val logger = LogManager.getLogger(ScheduledTasks::class.java)
+
     @Autowired
     lateinit var textAnalysisService: TextAnalysisService
 
     @Autowired
     lateinit var dataDownloaderService: DataDownloaderService
 
-    private val dateFormat = SimpleDateFormat("HH:mm:ss")
-
     @Scheduled(cron = "0 0 1 * * ?")
     fun fetchArticlesComments() {
-        println("Starting fetch at " + dateFormat.format(Date()))
+        logger.info("Starting remote data fetch at " + LocalDateTime.now())
         dataDownloaderService.fetchData()
-        println("Ending fetch at " + dateFormat.format(Date()))
+        logger.info("Ending remote data fetch at " + LocalDateTime.now())
     }
 
     @Scheduled(cron = "0 0 3 * * ?")
     fun checkArticleRoutine() {
-        println("Starting check at " + dateFormat.format(Date()))
+        logger.info("Starting similarity check at " + LocalDateTime.now())
         textAnalysisService.checkAllArticles()
-        println("Ending check at " + dateFormat.format(Date()))
+        logger.info("Ending similarity check at " + LocalDateTime.now())
     }
 
     @Scheduled(cron = "0 0 6 * * ?")
     fun checkCommentCountRoutine() {
-        println("Comment recount started at " + dateFormat.format(Date()))
+        logger.info("Starting comment recount at " + LocalDateTime.now())
         textAnalysisService.updateCommentCount()
-        println("Comment recount ended at " + dateFormat.format(Date()))
+        logger.info("Ending comment recount at " + LocalDateTime.now())
     }
 }

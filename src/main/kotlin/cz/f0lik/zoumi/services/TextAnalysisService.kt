@@ -7,6 +7,7 @@ import cz.f0lik.zoumi.repository.ArticleRepository
 import cz.f0lik.zoumi.repository.CommentRepository
 import cz.f0lik.zoumi.repository.SimilarCommentRepository
 import info.debatty.java.stringsimilarity.Jaccard
+import org.apache.logging.log4j.LogManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -19,6 +20,8 @@ class TextAnalysisService {
     companion object {
         val SIMILARITY_LIMIT = 0.6
     }
+
+    private val logger = LogManager.getLogger(TextAnalysisService::class.java)
 
     @Autowired
     lateinit var articleRepository: ArticleRepository
@@ -127,6 +130,7 @@ class TextAnalysisService {
     fun checkAllArticles() {
         val updatedArticleIds = commentRepository.getArticleIdsOfNewComments()
         if (updatedArticleIds.isPresent) {
+            logger.info("${updatedArticleIds.get().size} articles will be checked")
             updatedArticleIds.get().forEach { articleId ->
                 compareArticles(articleId)
             }

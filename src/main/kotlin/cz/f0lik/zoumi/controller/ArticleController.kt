@@ -2,6 +2,7 @@ package cz.f0lik.zoumi.controller
 
 import cz.f0lik.zoumi.services.DataDownloaderService
 import cz.f0lik.zoumi.services.TextAnalysisService
+import org.apache.logging.log4j.LogManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
@@ -9,6 +10,8 @@ import java.time.LocalDateTime
 @RestController
 @RequestMapping("/api")
 class ArticleController {
+    private val logger = LogManager.getLogger(ArticleController::class.java)
+
     @Autowired
     lateinit var textAnalysisService: TextAnalysisService
 
@@ -17,27 +20,22 @@ class ArticleController {
 
     @GetMapping("/articles/recountArticles")
     fun recountArticles(){
-        println("Starting check at " + LocalDateTime.now())
+        logger.info("Starting similarity check at " + LocalDateTime.now())
         textAnalysisService.checkAllArticles()
-        println("Ending check at " + LocalDateTime.now())
+        logger.info("Ending similarity check at " + LocalDateTime.now())
     }
 
     @GetMapping("/articles/recountComments")
     fun recountComments(){
-        println("Comment recount started at " + LocalDateTime.now())
+        logger.info("Starting comment recount at " + LocalDateTime.now())
         textAnalysisService.updateCommentCount()
-        println("Comment recount ended at " + LocalDateTime.now())
+        logger.info("Ending comment recount at " + LocalDateTime.now())
     }
 
     @GetMapping("/articles/fetchAll")
     fun fetchAllNew(){
-        println("Fetch initiated at " + LocalDateTime.now())
+        logger.info("Starting remote data fetch at " + LocalDateTime.now())
         dataDownloaderService.fetchData()
-        println("Fetch completed at " + LocalDateTime.now())
-    }
-
-    @GetMapping("/articles/updateCurrent")
-    fun updateCurrent() {
-        dataDownloaderService.updateCurrentArticles()
+        logger.info("Ending remote data fetch at " + LocalDateTime.now())
     }
 }

@@ -7,6 +7,7 @@ import cz.f0lik.zoumi.repository.ArticleRepository
 import cz.f0lik.zoumi.repository.CommentRepository
 import cz.f0lik.zoumi.repository.PortalRepository
 import cz.f0lik.zoumi.utils.DbConnector
+import org.apache.logging.log4j.LogManager
 import org.hibernate.SessionFactory
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +23,8 @@ import kotlin.collections.ArrayList
 
 @Service("dataDownloaderService")
 class DataDownloaderService {
+    private val logger = LogManager.getLogger(DataDownloaderService::class.java)
+
     @Autowired
     lateinit var articleRepository: ArticleRepository
 
@@ -41,12 +44,13 @@ class DataDownloaderService {
         val queryArticleCount = "SELECT COUNT(*) AS article_count FROM ARTICLE"
         val resultSet = dbConnector.createStatement().executeQuery(queryArticleCount)
         if (!resultSet.next()) {
-            throw IllegalStateException("Missing data")
+            handleMissingData()
         }
         val remoteArticleCount = resultSet.getInt("article_count")
         val localArticleCount = articleRepository.count()
 
         if (remoteArticleCount <= localArticleCount) {
+            logger.info("All articles are known locally")
             return
         }
 
@@ -57,6 +61,7 @@ class DataDownloaderService {
             Collections.sort(articlesCreatedTime.get(), Collections.reverseOrder())
             localMaxCreatedDate = articlesCreatedTime.get()[0]
         }
+        logger.info("Articles newer than $localMaxCreatedDate will be fetched to local DB")
 
         val newerArticlesStatement = dbConnector.prepareStatement("SELECT id_article, created," +
                 " description, id_portal_pkey, last_collection, name, url, keywords FROM article WHERE created > ?")
@@ -87,7 +92,7 @@ class DataDownloaderService {
         val queryPortalCount = "SELECT COUNT(*) AS portal_count FROM PORTAL"
         val remotePortalCountResult = dbConnector.createStatement().executeQuery(queryPortalCount)
         if (!remotePortalCountResult.next()) {
-            throw IllegalStateException("Missing data")
+            handleMissingData()
         }
         val remotePortalCount = remotePortalCountResult.getInt("portal_count")
         val localPortalCount = portalRepository.count()
@@ -198,5 +203,11 @@ class DataDownloaderService {
         }
         transaction.commit()
         session.close()
+    }
+
+    private fun handleMissingData() {
+        val errorMessage = "Remote database is missing data"
+        logger.error(errorMessage)
+        throw IllegalStateException(errorMessage)
     }
 }
