@@ -41,7 +41,7 @@ class Article {
     @Column(columnDefinition = "text")
     var url: String = ""
 
-    @OneToMany(cascade = arrayOf(CascadeType.ALL), fetch = FetchType.EAGER, mappedBy = "article")
+    @OneToMany(cascade = arrayOf(CascadeType.ALL), fetch = FetchType.LAZY, mappedBy = "article")
     @JsonManagedReference
     var comments: MutableSet<Comment>? = null
 
