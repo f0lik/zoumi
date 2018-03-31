@@ -1,7 +1,6 @@
 package cz.f0lik.zoumi.services
 
-import cz.f0lik.zoumi.model.Article
-import cz.f0lik.zoumi.model.Comment
+import cz.f0lik.zoumi.model.CommentDTO
 import cz.f0lik.zoumi.repository.ArticleRepository
 import cz.f0lik.zoumi.repository.CommentRepository
 import cz.f0lik.zoumi.repository.SimilarCommentRepository
@@ -17,12 +16,9 @@ class TextAnalysisServiceSpec extends Specification {
 
     def "two similar comments should be marked as similar"() {
         when:
-        def article1 = new Article()
-        article1.id = 1
-        def firstComment = new Comment(id: 1, commentText: "Ahoj, jsem uplne stejny", isNew: false, article: article1)
-        def secondComment = new Comment(id: 2, commentText: "Ahoj, jsem uplne stejny", isNew: false, article: article1)
-
-        def similarity = textAnalysisService.checkCommentSimilarity(firstComment, secondComment)
+        def comment1 = new TestComment(1, "Ahoj, jsem uplne stejny", 1)
+        def comment2 = new TestComment(2, "Ahoj, jsem uplne stejny", 1)
+        def similarity = textAnalysisService.checkCommentSimilarity(comment1, comment2)
 
         then:
         similarity == 1
@@ -30,12 +26,9 @@ class TextAnalysisServiceSpec extends Specification {
 
     def "two different comments should not be marked as similar"() {
         when:
-        def article1 = new Article()
-        article1.id = 1
-        def firstComment = new Comment(id: 1, commentText: "Ahoj, jsem uplne stejny", isNew: false, article: article1)
-        def secondComment = new Comment(id: 2, commentText: "This code is *******", isNew: false, article: article1)
-
-        def similarity = textAnalysisService.checkCommentSimilarity(firstComment, secondComment)
+        def comment1 = new TestComment(1, "Ahoj, jsem uplne stejny", 1)
+        def comment2 = new TestComment(2, "This code is *******", 1)
+        def similarity = textAnalysisService.checkCommentSimilarity(comment1, comment2)
 
         then:
         similarity < TextAnalysisService.SIMILARITY_LIMIT
@@ -43,15 +36,39 @@ class TextAnalysisServiceSpec extends Specification {
 
     def "two different comments should be marked as similar"() {
         when:
-        def article1 = new Article()
-        article1.id = 1
-        def firstComment = new Comment(id: 1, commentText: "Ahoj, jsem uplne stejny", isNew: false, article: article1)
-        def secondComment = new Comment(id: 2, commentText: "Hoj, jsem uplne stejny", isNew: false, article: article1)
-
-        def similarity = textAnalysisService.checkCommentSimilarity(firstComment, secondComment)
+        def comment1 = new TestComment(1, "Ahoj, jsem uplne stejny", 1)
+        def comment2 = new TestComment(2, "Hoj, jsem uplne stejny", 1)
+        def similarity = textAnalysisService.checkCommentSimilarity(comment1, comment2)
 
         then:
         similarity > TextAnalysisService.SIMILARITY_LIMIT
+    }
+}
+
+class TestComment implements CommentDTO {
+    private String text
+    private long id
+    private long articleId
+
+    TestComment(long id, String text, long articleId) {
+        this.id = id
+        this.text = text
+        this.articleId = articleId
+    }
+
+    @Override
+    long getCommentId() {
+        return id
+    }
+
+    @Override
+    String getCommentText() {
+        return text
+    }
+
+    @Override
+    long getCommentArticleId() {
+        return articleId
     }
 }
 
