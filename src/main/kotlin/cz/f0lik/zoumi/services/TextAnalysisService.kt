@@ -130,7 +130,9 @@ class TextAnalysisService {
     fun updateCommentCount() {
         val notRecountedArticleIDs = commentRepository.getArticleIdsOfNotCountedComments()
         if (notRecountedArticleIDs.isPresent) {
+            logger.info("${notRecountedArticleIDs.get().size} articles will be recounted")
             notRecountedArticleIDs.get().forEach { articleId ->
+                val startTime = System.currentTimeMillis()
                 val updatedArticle = articleRepository.findOne(articleId)
                 updatedArticle.commentCount = commentRepository.getCommentCount(articleId)
                 updatedArticle.similarCommentCount = similarCommentRepository.getSuspiciousCommentCount(articleId)
@@ -140,6 +142,9 @@ class TextAnalysisService {
                     commentRepository.save(commentsToRecount.get())
                 }
                 articleRepository.save(updatedArticle)
+                val stopTime = System.currentTimeMillis()
+                val elapsedTime = stopTime - startTime
+                logger.info("Comment recount on article id $articleId took $elapsedTime miliseconds")
             }
         }
     }

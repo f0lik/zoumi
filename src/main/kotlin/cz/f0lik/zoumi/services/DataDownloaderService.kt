@@ -202,6 +202,7 @@ class DataDownloaderService {
             i++
         }
         transaction.commit()
+        newComments.close()
         session.close()
     }
 
