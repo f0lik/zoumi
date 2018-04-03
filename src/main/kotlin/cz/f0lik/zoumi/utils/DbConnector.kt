@@ -16,7 +16,7 @@ class DbConnector private constructor() {
     }
 
     fun getConnection(): Connection? {
-        if (connector == null) {
+        if (connector == null || connector!!.isClosed) {
             Class.forName("org.postgresql.Driver")
             val dbUrl = System.getProperty("dbUrl")
             connector = DriverManager.getConnection(dbUrl)
