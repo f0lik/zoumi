@@ -1,4 +1,4 @@
 # zoumi
 This is a application which analyzes similarity in comments.
 
-https://travis-ci.org/f0lik/zoumi.svg?branch=master
+Travis CI: [![Build Status](https://travis-ci.org/f0lik/zoumi.svg?branch=master)](https://travis-ci.org/f0lik/zoumi)
