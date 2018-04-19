@@ -4,6 +4,7 @@ import cz.f0lik.zoumi.model.Article
 import cz.f0lik.zoumi.repository.ArticleRepository
 import cz.f0lik.zoumi.services.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,6 +38,9 @@ class AppController {
     val sortAttributesMap = mapOf("Počet komentářů" to "commentCount", "Počet podobných komentářů" to "similarCommentCount")
     val sortDirectionMap = mapOf("Vzestupně" to "ASC", "Sestupně" to "DESC")
 
+    @Value("\${cz.f0lik.zoumi.appVersion}")
+    private val applicationVersion: String? = null
+
     @GetMapping(value = ["/"])
     fun index(model: Model): ModelAndView {
         val modelAndView = ModelAndView()
@@ -48,6 +52,7 @@ class AppController {
         modelAndView.addObject("similarCommentCount", statsService.getSimilarCommentCount())
         modelAndView.addObject("similarCommentBetweenCount",
                 statsService.getSimilarCommentCountInBetween(60, 90))
+        modelAndView.addObject("version", applicationVersion)
         return modelAndView
     }
 
@@ -92,6 +97,7 @@ class AppController {
         modelAndView.addObject("sortDirections", sortDirectionMap)
         modelAndView.addObject("selectedSortDirection", evaluatedSortDirection)
         modelAndView.addObject("pager", pager)
+        modelAndView.addObject("version", applicationVersion)
         return modelAndView
     }
 
@@ -112,6 +118,7 @@ class AppController {
         modelAndView.viewName = "article"
         modelAndView.addObject("article", article)
         modelAndView.addObject("suspiciousCount", statsService.getSuspiciousCommentsCount(articleId))
+        modelAndView.addObject("version", applicationVersion)
         if (showComments) {
             modelAndView.addObject("suspComments", textService.getSuspiciousComments(articleId))
         }
