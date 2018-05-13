@@ -9,8 +9,8 @@ import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api")
-class ArticleController {
-    private val logger = LogManager.getLogger(ArticleController::class.java)
+class ApiController {
+    private val logger = LogManager.getLogger(ApiController::class.java)
 
     @Autowired
     lateinit var textAnalysisService: TextAnalysisService
