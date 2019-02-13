@@ -13,6 +13,7 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.web.bind.annotation.RequestParam
+import java.time.Year
 import java.util.*
 
 @Controller
@@ -53,6 +54,7 @@ class AppController {
         modelAndView.addObject("similarCommentBetweenCount",
                 statsService.getSimilarCommentCountInBetween(60, 90))
         modelAndView.addObject("version", applicationVersion)
+        modelAndView.addObject("currentYear", Year.now().value)
         return modelAndView
     }
 
