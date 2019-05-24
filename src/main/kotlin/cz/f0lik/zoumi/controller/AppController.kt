@@ -100,6 +100,7 @@ class AppController {
         modelAndView.addObject("selectedSortDirection", evaluatedSortDirection)
         modelAndView.addObject("pager", pager)
         modelAndView.addObject("version", applicationVersion)
+        modelAndView.addObject("currentYear", Year.now().value)
         return modelAndView
     }
 
@@ -121,6 +122,7 @@ class AppController {
         modelAndView.addObject("article", article)
         modelAndView.addObject("suspiciousCount", statsService.getSuspiciousCommentsCount(articleId))
         modelAndView.addObject("version", applicationVersion)
+        modelAndView.addObject("currentYear", Year.now().value)
         if (showComments) {
             modelAndView.addObject("suspComments", textService.getSuspiciousComments(articleId))
         }
